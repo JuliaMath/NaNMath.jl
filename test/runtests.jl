@@ -1,5 +1,5 @@
 using NaNMath
 using Base.Test
 
-# write your own tests here
-@test 1 == 1
+@test isnan(NaNMath.log(-10))
+@test isnan(NaNMath.pow(-1.5,2.3))
