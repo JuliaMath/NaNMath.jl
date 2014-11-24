@@ -13,5 +13,6 @@ end
 # Don't override built-in ^ operator
 pow(x::Float64, y::Float64) = ccall((:pow,Base.Math.libm),  Float64, (Float64,Float64), x, y)
 pow(x::Float32, y::Float32) = ccall((:powf,Base.Math.libm), Float32, (Float32,Float32), x, y)
+pow(x,y) = pow(float(x),float(y))
 
 end
