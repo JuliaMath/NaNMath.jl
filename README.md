@@ -6,7 +6,7 @@ Example:
 ```julia
 import NaNMath
 NaNMath.log(-100) # NaN
-NanMAth.pow(-1.5,2.3) # NaN
+NaNMath.pow(-1.5,2.3) # NaN
 ```
 
 
