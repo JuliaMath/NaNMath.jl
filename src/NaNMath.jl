@@ -16,20 +16,37 @@ pow(x::Float64, y::Float64) = ccall((:pow,Base.Math.libm),  Float64, (Float64,Fl
 pow(x::Float32, y::Float32) = ccall((:powf,Base.Math.libm), Float32, (Float32,Float32), x, y)
 pow(x,y) = pow(float(x),float(y))
 
-function sum(x::Array{Float64,1})
-    result = NaN
-    for i = x
-        if !isnan(i)
-            if isnan(result)
-                result = i
-            else
-                result += i
+"""
+NaNMath.sum(A)
+
+##### Args:
+* `A`: A one dimensional array of floating point numbers
+
+##### Returns:
+*    Returns the sum of all elements in an array, ignoring NaN's.
+
+##### Examples:
+```julia
+using NaNMath as nm
+nm.sum([1., 2., NaN]) # result: 3.0
+```
+"""
+function sum{T<:FloatingPoint}(x::Vector{T})
+    if size(x)[1] == 0
+        result = zero(eltype(x))
+    else
+        result = convert(eltype(x), NaN)
+        for i in x
+            if !isnan(i)
+                if isnan(result)
+                    result = i
+                else
+                    result += i
+                end
             end
         end
     end
-    if size(x)[1] == 0
-        result = 0.0
-    end
+
     if isnan(result)
         Base.warn_once("All elements of the array, passed to \"sum\" are NaN!")
     end
