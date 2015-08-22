@@ -14,6 +14,11 @@ The following functions are implemented:
 
 ```
 sum
+maximum
+minimum
+mean
+var
+std
 ```
 
 Example:

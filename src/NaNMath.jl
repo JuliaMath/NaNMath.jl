@@ -23,7 +23,7 @@ NaNMath.sum(A)
 * `A`: A one dimensional array of floating point numbers
 
 ##### Returns:
-*    Returns the sum of all elements in an array, ignoring NaN's.
+*    Returns the sum of all elements in the array, ignoring NaN's.
 
 ##### Examples:
 ```julia
@@ -51,6 +51,158 @@ function sum{T<:FloatingPoint}(x::Vector{T})
         Base.warn_once("All elements of the array, passed to \"sum\" are NaN!")
     end
     return result
+end
+
+"""
+NaNMath.maximum(A)
+
+##### Args:
+* `A`: A one dimensional array of floating point numbers
+
+##### Returns:
+*    Returns the maximum of all elements in the array, ignoring NaN's.
+
+##### Examples:
+```julia
+using NaNMath as nm
+nm.maximum([1., 2., NaN]) # result: 2.0
+```
+"""
+function maximum{T<:FloatingPoint}(x::Vector{T})
+    result = convert(eltype(x), NaN)
+    for i in x
+        if !isnan(i)
+            if (isnan(result) || i > result)
+                result = i
+            end
+        end
+    end
+    return result
+end
+
+"""
+NaNMath.minimum(A)
+
+##### Args:
+* `A`: A one dimensional array of floating point numbers
+
+##### Returns:
+*    Returns the minimum of all elements in the array, ignoring NaN's.
+
+##### Examples:
+```julia
+using NaNMath as nm
+nm.minimum([1., 2., NaN]) # result: 1.0
+```
+"""
+function minimum{T<:FloatingPoint}(x::Vector{T})
+    result = convert(eltype(x), NaN)
+    for i in x
+        if !isnan(i)
+            if (isnan(result) || i < result)
+                result = i
+            end
+        end
+    end
+    return result
+end
+
+"""
+NaNMath.mean(A)
+
+##### Args:
+* `A`: A one dimensional array of floating point numbers
+
+##### Returns:
+*    Returns the arithmetic mean of all elements in the array, ignoring NaN's.
+
+##### Examples:
+```julia
+using NaNMath as nm
+nm.mean([1., 2., NaN]) # result: 1.5
+```
+"""
+function mean{T<:FloatingPoint}(x::Vector{T})
+    return mean_count(x)[1]
+end
+
+"""
+Returns a tuple of the arithmetic mean of all elements in the array, ignoring NaN's,
+and the number of non-NaN values in the array.
+"""
+function mean_count{T<:FloatingPoint}(x::Vector{T})
+    sum = convert(eltype(x), NaN)
+    count = 0
+    for i in x
+        if !isnan(i)
+            if isnan(sum)
+                sum = i
+                count = 1
+            else
+                sum += i
+                count += 1
+            end
+        end
+    end
+    result = sum / count
+    return (result, count)
+end
+
+"""
+NaNMath.var(A)
+
+##### Args:
+* `A`: A one dimensional array of floating point numbers
+
+##### Returns:
+* Returns the sample variance of a vector A. The algorithm will return
+  an estimator of the  generative distribution's variance under the
+  assumption that each entry of v is an IID drawn from that generative
+  distribution. This computation is  equivalent to calculating \\
+  sum((v - mean(v)).^2) / (length(v) - 1). NaN values are ignored.
+
+##### Examples:
+```julia
+using NaNMath as nm
+nm.var([1., 2., NaN]) # result: 0.5
+```
+"""
+function var{T<:FloatingPoint}(x::Vector{T})
+    mean_val, n = mean_count(x)
+    if !isnan(mean_val)
+        sum_square = zero(eltype(x))
+        for i in x
+            if !isnan(i)
+                sum_square += (i - mean_val)^2
+            end
+        end
+        return sum_square / (n - one(eltype(x)))
+    else
+        return mean_val # NaN or NaN32
+    end
+end
+
+"""
+NaNMath.std(A)
+
+##### Args:
+* `A`: A one dimensional array of floating point numbers
+
+##### Returns:
+* Returns the standard deviation of a vector A. The algorithm will return
+  an estimator of the  generative distribution's standard deviation under the
+  assumption that each entry of v is an IID drawn from that generative
+  distribution. This computation is  equivalent to calculating \\
+  sqrt(sum((v - mean(v)).^2) / (length(v) - 1)). NaN values are ignored.
+
+##### Examples:
+```julia
+using NaNMath as nm
+nm.std([1., 2., NaN]) # result: 0.7071067811865476
+```
+"""
+function std{T<:FloatingPoint}(x::Vector{T})
+    return sqrt(var(x))
 end
 
 end
