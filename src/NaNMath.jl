@@ -1,6 +1,8 @@
 VERSION >= v"0.4.0-dev+6521" && __precompile__()
 module NaNMath
 
+using Compat
+
 for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
           :lgamma, :log1p)
     @eval begin
@@ -31,7 +33,7 @@ using NaNMath as nm
 nm.sum([1., 2., NaN]) # result: 3.0
 ```
 """
-function sum{T<:FloatingPoint}(x::Vector{T})
+function sum{T<:AbstractFloat}(x::Vector{T})
     if size(x)[1] == 0
         result = zero(eltype(x))
     else
@@ -68,7 +70,7 @@ using NaNMath as nm
 nm.maximum([1., 2., NaN]) # result: 2.0
 ```
 """
-function maximum{T<:FloatingPoint}(x::Vector{T})
+function maximum{T<:AbstractFloat}(x::Vector{T})
     result = convert(eltype(x), NaN)
     for i in x
         if !isnan(i)
@@ -95,7 +97,7 @@ using NaNMath as nm
 nm.minimum([1., 2., NaN]) # result: 1.0
 ```
 """
-function minimum{T<:FloatingPoint}(x::Vector{T})
+function minimum{T<:AbstractFloat}(x::Vector{T})
     result = convert(eltype(x), NaN)
     for i in x
         if !isnan(i)
@@ -122,7 +124,7 @@ using NaNMath as nm
 nm.mean([1., 2., NaN]) # result: 1.5
 ```
 """
-function mean{T<:FloatingPoint}(x::Vector{T})
+function mean{T<:AbstractFloat}(x::Vector{T})
     return mean_count(x)[1]
 end
 
@@ -130,7 +132,7 @@ end
 Returns a tuple of the arithmetic mean of all elements in the array, ignoring NaN's,
 and the number of non-NaN values in the array.
 """
-function mean_count{T<:FloatingPoint}(x::Vector{T})
+function mean_count{T<:AbstractFloat}(x::Vector{T})
     sum = convert(eltype(x), NaN)
     count = 0
     for i in x
@@ -167,7 +169,7 @@ using NaNMath as nm
 nm.var([1., 2., NaN]) # result: 0.5
 ```
 """
-function var{T<:FloatingPoint}(x::Vector{T})
+function var{T<:AbstractFloat}(x::Vector{T})
     mean_val, n = mean_count(x)
     if !isnan(mean_val)
         sum_square = zero(eltype(x))
@@ -201,7 +203,7 @@ using NaNMath as nm
 nm.std([1., 2., NaN]) # result: 0.7071067811865476
 ```
 """
-function std{T<:FloatingPoint}(x::Vector{T})
+function std{T<:AbstractFloat}(x::Vector{T})
     return sqrt(var(x))
 end
 
