@@ -1,7 +1,5 @@
-VERSION >= v"0.4.0-dev+6521" && __precompile__()
+__precompile__()
 module NaNMath
-
-using Compat
 
 for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
           :lgamma, :log1p)
