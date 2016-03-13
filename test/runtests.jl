@@ -4,6 +4,8 @@ using Base.Test
 @test isnan(NaNMath.log(-10))
 @test isnan(NaNMath.log1p(-100))
 @test isnan(NaNMath.pow(-1.5,2.3))
+@test isnan(NaNMath.sqrt(-5))
+@test NaNMath.sqrt(5) == Base.sqrt(5)
 @test NaNMath.sum([1., 2., NaN]) == 3.0
 @test isnan(NaNMath.sum([NaN, NaN]))
 @test NaNMath.sum(Float64[]) == 0.0
