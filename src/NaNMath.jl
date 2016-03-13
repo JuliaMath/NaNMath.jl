@@ -11,6 +11,10 @@ for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
     end
 end
 
+# Would be more efficient to remove the domain check in Base.sqrt(),
+# but this doesn't seem easy to do.
+sqrt(x::Real) = x < 0.0 ? NaN : Base.sqrt(x)
+
 # Don't override built-in ^ operator
 pow(x::Float64, y::Float64) = ccall((:pow,Base.Math.libm),  Float64, (Float64,Float64), x, y)
 pow(x::Float32, y::Float32) = ccall((:powf,Base.Math.libm), Float32, (Float32,Float32), x, y)
