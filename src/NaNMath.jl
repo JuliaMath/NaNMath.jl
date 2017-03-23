@@ -211,4 +211,73 @@ function std{T<:AbstractFloat}(x::Vector{T})
     return sqrt(var(x))
 end
 
+"""
+    NaNMath.min(x, y)
+
+Compute the IEEE 754-2008 compliant minimum of `x` and `y`. As of version 0.6 of Julia,
+`Base.min(x, y)` will return `NaN` if `x` or `y` is `NaN`. `NanMath.min` favors values over
+`NaN`, and will return whichever `x` or `y` is not `NaN` in that case.
+
+## Examples
+
+```julia
+julia> NanMath.min(NaN, 0.0)
+0.0
+
+julia> NaNMath.min(1, 2)
+1
+```
+"""
+min{T<:AbstractFloat}(x::T, y::T) = ifelse((y < x) | (signbit(y) > signbit(x)),
+                                           ifelse(isnan(y), x, y),
+                                           ifelse(isnan(x), y, x))
+
+"""
+    NaNMath.max(x, y)
+
+Compute the IEEE 754-2008 compliant maximum of `x` and `y`. As of version 0.6 of Julia,
+`Base.max(x, y)` will return `NaN` if `x` or `y` is `NaN`. `NaNMath.max` favors values over
+`NaN`, and will return whichever `x` or `y` is not `NaN` in that case.
+
+## Examples
+
+```julia
+julia> NaNMath.max(NaN, 0.0)
+0.0
+
+julia> NaNMath.max(1, 2)
+2
+```
+"""
+max{T<:AbstractFloat}(x::T, y::T) = ifelse((y > x) | (signbit(y) < signbit(x)),
+                                           ifelse(isnan(y), x, y),
+                                           ifelse(isnan(x), y, x))
+
+min(x::Real, y::Real) = min(promote(x, y)...)
+max(x::Real, y::Real) = max(promote(x, y)...)
+
+function min(x::BigFloat, y::BigFloat)
+    isnan(x) && return y
+    isnan(y) && return x
+    return Base.min(x, y)
+end
+
+function max(x::BigFloat, y::BigFloat)
+    isnan(x) && return y
+    isnan(y) && return x
+    return Base.max(x, y)
+end
+
+# Integers can't represent NaN
+min(x::Integer, y::Integer) = Base.min(x, y)
+max(x::Integer, y::Integer) = Base.max(x, y)
+
+min(x::Real) = x
+max(x::Real) = x
+
+# Multi-arg versions
+for f in (:min, :max)
+    @eval ($f)(a, b, c, xs...) = Base.afoldl($f, ($f)(($f)(a, b), c), xs...)
+end
+
 end
