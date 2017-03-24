@@ -19,6 +19,8 @@ minimum
 mean
 var
 std
+min
+max
 ```
 
 Example:
