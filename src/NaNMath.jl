@@ -121,6 +121,35 @@ function minimum{T<:AbstractFloat}(x::Vector{T})
 end
 
 """
+NaNMath.extrema(A)
+
+##### Args:
+* `A`: A one dimensional array of floating point numbers
+
+##### Returns:
+*    Returns the minimum and maximum of all elements in the array, ignoring NaN's.
+
+##### Examples:
+```julia
+using NaNMath as nm
+nm.extrema([1., 2., NaN]) # result: 1.0, 2.0
+```
+"""
+function extrema{T<:AbstractFloat}(x::Vector{T})
+    resultmin, resultmax = convert(eltype(x), NaN), convert(eltype(x), NaN)
+    for i in x
+        if !isnan(i)
+            if (isnan(resultmin) || i < resultmin)
+                resultmin = i
+            elseif (isnan(resultmax) || i > resultmax)
+                resultmax = i
+            end
+        end
+    end
+    return resultmin, resultmax
+end
+
+"""
 NaNMath.mean(A)
 
 ##### Args:
