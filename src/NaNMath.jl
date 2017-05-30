@@ -209,7 +209,7 @@ using NaNMath as nm
 nm.var([1., 2., NaN]) # result: 0.5
 ```
 """
-function var{T<:AbstractFloat}(x::Vector{T})
+function var{T<:AbstractFloat}(x::AbstractVector{T})
     mean_val, n = mean_count(x)
     if !isnan(mean_val)
         sum_square = zero(eltype(x))
@@ -243,7 +243,7 @@ using NaNMath as nm
 nm.std([1., 2., NaN]) # result: 0.7071067811865476
 ```
 """
-function std{T<:AbstractFloat}(x::Vector{T})
+function std{T<:AbstractFloat}(x::AbstractVector{T})
     return sqrt(var(x))
 end
 
