@@ -16,6 +16,7 @@ The following functions are implemented:
 sum
 maximum
 minimum
+extrema
 mean
 var
 std
