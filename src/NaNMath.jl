@@ -45,7 +45,7 @@ nm.sum([1., 2., NaN]) # result: 3.0
 ```
 """
 function sum{T<:AbstractFloat}(x::AbstractArray{T})
-    if size(x)[1] == 0
+    if length(x) == 0
         result = zero(eltype(x))
     else
         result = convert(eltype(x), NaN)
