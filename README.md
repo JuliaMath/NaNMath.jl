@@ -9,7 +9,7 @@ NaNMath.log(-100) # NaN
 NaNMath.pow(-1.5,2.3) # NaN
 ```
 
-In addition this package provides functions that aggregate one dimensional arrays and ignore elements that are NaN.
+In addition this package provides functions that aggregate arrays and ignore elements that are NaN.
 The following functions are implemented:
 
 ```

@@ -33,7 +33,7 @@ pow(x::Number,y::Number) = pow(float(x),float(y))
 NaNMath.sum(A)
 
 ##### Args:
-* `A`: A one dimensional array of floating point numbers
+* `A`: An array of floating point numbers
 
 ##### Returns:
 *    Returns the sum of all elements in the array, ignoring NaN's.
@@ -44,8 +44,8 @@ using NaNMath as nm
 nm.sum([1., 2., NaN]) # result: 3.0
 ```
 """
-function sum{T<:AbstractFloat}(x::Vector{T})
-    if size(x)[1] == 0
+function sum{T<:AbstractFloat}(x::AbstractArray{T})
+    if length(x) == 0
         result = zero(eltype(x))
     else
         result = convert(eltype(x), NaN)
@@ -70,7 +70,7 @@ end
 NaNMath.maximum(A)
 
 ##### Args:
-* `A`: A one dimensional array of floating point numbers
+* `A`: An array of floating point numbers
 
 ##### Returns:
 *    Returns the maximum of all elements in the array, ignoring NaN's.
@@ -81,7 +81,7 @@ using NaNMath as nm
 nm.maximum([1., 2., NaN]) # result: 2.0
 ```
 """
-function maximum{T<:AbstractFloat}(x::Vector{T})
+function maximum{T<:AbstractFloat}(x::AbstractArray{T})
     result = convert(eltype(x), NaN)
     for i in x
         if !isnan(i)
@@ -97,7 +97,7 @@ end
 NaNMath.minimum(A)
 
 ##### Args:
-* `A`: A one dimensional array of floating point numbers
+* `A`: An array of floating point numbers
 
 ##### Returns:
 *    Returns the minimum of all elements in the array, ignoring NaN's.
@@ -108,7 +108,7 @@ using NaNMath as nm
 nm.minimum([1., 2., NaN]) # result: 1.0
 ```
 """
-function minimum{T<:AbstractFloat}(x::Vector{T})
+function minimum{T<:AbstractFloat}(x::AbstractArray{T})
     result = convert(eltype(x), NaN)
     for i in x
         if !isnan(i)
@@ -124,7 +124,7 @@ end
 NaNMath.extrema(A)
 
 ##### Args:
-* `A`: A one dimensional array of floating point numbers
+* `A`: An array of floating point numbers
 
 ##### Returns:
 *    Returns the minimum and maximum of all elements in the array, ignoring NaN's.
@@ -135,7 +135,7 @@ using NaNMath as nm
 nm.extrema([1., 2., NaN]) # result: 1.0, 2.0
 ```
 """
-function extrema{T<:AbstractFloat}(x::Vector{T})
+function extrema{T<:AbstractFloat}(x::AbstractArray{T})
     resultmin, resultmax = convert(eltype(x), NaN), convert(eltype(x), NaN)
     for i in x
         if !isnan(i)
@@ -153,7 +153,7 @@ end
 NaNMath.mean(A)
 
 ##### Args:
-* `A`: A one dimensional array of floating point numbers
+* `A`: An array of floating point numbers
 
 ##### Returns:
 *    Returns the arithmetic mean of all elements in the array, ignoring NaN's.
@@ -164,7 +164,7 @@ using NaNMath as nm
 nm.mean([1., 2., NaN]) # result: 1.5
 ```
 """
-function mean{T<:AbstractFloat}(x::Vector{T})
+function mean{T<:AbstractFloat}(x::AbstractArray{T})
     return mean_count(x)[1]
 end
 
@@ -172,7 +172,7 @@ end
 Returns a tuple of the arithmetic mean of all elements in the array, ignoring NaN's,
 and the number of non-NaN values in the array.
 """
-function mean_count{T<:AbstractFloat}(x::Vector{T})
+function mean_count{T<:AbstractFloat}(x::AbstractArray{T})
     sum = convert(eltype(x), NaN)
     count = 0
     for i in x
