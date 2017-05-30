@@ -66,6 +66,8 @@ function sum{T<:AbstractFloat}(x::AbstractArray{T})
     return result
 end
 
+sum(x) = Base.sum(x)
+
 """
 NaNMath.maximum(A)
 
@@ -93,6 +95,8 @@ function maximum{T<:AbstractFloat}(x::AbstractArray{T})
     return result
 end
 
+maximum(x) = Base.maximum(x)
+
 """
 NaNMath.minimum(A)
 
@@ -119,6 +123,8 @@ function minimum{T<:AbstractFloat}(x::AbstractArray{T})
     end
     return result
 end
+
+minimum(x) = Base.minimum(x)
 
 """
 NaNMath.extrema(A)
@@ -149,6 +155,8 @@ function extrema{T<:AbstractFloat}(x::AbstractArray{T})
     return resultmin, resultmax
 end
 
+extrema(x) = Base.extrema(x)
+
 """
 NaNMath.mean(A)
 
@@ -167,6 +175,8 @@ nm.mean([1., 2., NaN]) # result: 1.5
 function mean{T<:AbstractFloat}(x::AbstractArray{T})
     return mean_count(x)[1]
 end
+
+mean(x) = Base.mean(x)
 
 """
 Returns a tuple of the arithmetic mean of all elements in the array, ignoring NaN's,
@@ -224,6 +234,8 @@ function var{T<:AbstractFloat}(x::AbstractVector{T})
     end
 end
 
+var(x) = Base.var(x)
+
 """
 NaNMath.std(A)
 
@@ -246,6 +258,7 @@ nm.std([1., 2., NaN]) # result: 0.7071067811865476
 function std{T<:AbstractFloat}(x::AbstractVector{T})
     return sqrt(var(x))
 end
+std(x) = Base.std(x)
 
 """
     NaNMath.min(x, y)
