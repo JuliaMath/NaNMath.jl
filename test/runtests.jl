@@ -16,7 +16,10 @@ using Base.Test
 @test NaNMath.minimum([1., 2., NaN]) == 1.0
 @test NaNMath.minimum([1. 2.; NaN 1.]) == 1.0
 @test NaNMath.extrema([1., 2., NaN]) == (1.0, 2.0)
+@test NaNMath.extrema([2., 1., NaN]) == (1.0, 2.0)
 @test NaNMath.extrema([1. 2.; NaN 1.]) == (1.0, 2.0)
+@test NaNMath.extrema([2. 1.; 1. NaN]) == (1.0, 2.0)
+@test NaNMath.extrema([NaN, -1., NaN]) == (-1.0, -1.0)
 @test NaNMath.mean([1., 2., NaN]) == 1.5
 @test NaNMath.mean([1. 2.; NaN 3.]) == 2.0
 @test NaNMath.var([1., 2., NaN]) == 0.5
