@@ -141,7 +141,8 @@ function extrema{T<:AbstractFloat}(x::AbstractArray{T})
         if !isnan(i)
             if (isnan(resultmin) || i < resultmin)
                 resultmin = i
-            elseif (isnan(resultmax) || i > resultmax)
+            end
+            if (isnan(resultmax) || i > resultmax)
                 resultmax = i
             end
         end
