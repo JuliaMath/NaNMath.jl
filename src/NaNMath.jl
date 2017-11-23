@@ -1,21 +1,15 @@
 __precompile__()
 module NaNMath
 
-using Compat
-
 for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
           :lgamma, :log1p)
     @eval begin
         ($f)(x::Float64) = ccall(($(string(f)),Base.Math.libm), Float64, (Float64,), x)
         ($f)(x::Float32) = ccall(($(string(f,"f")),Base.Math.libm), Float32, (Float32,), x)
         ($f)(x::Real) = ($f)(float(x))
-        if VERSION >= v"0.5.0-dev+4002"
-            function ($f){T<:Number}(x::AbstractArray{T})
-                Base.depwarn("$f{T<:Number}(x::AbstractArray{T}) is deprecated, use $f.(x) instead.", $f)
-                return ($f).(x)
-            end
-        else
-            ($f){T<:Number}(x::AbstractArray{T}) = broadcast($f, x)
+        function ($f){T<:Number}(x::AbstractArray{T})
+            Base.depwarn("$f{T<:Number}(x::AbstractArray{T}) is deprecated, use $f.(x) instead.", $f)
+            return ($f).(x)
         end
     end
 end
