@@ -7,7 +7,7 @@ for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
         ($f)(x::Float64) = ccall(($(string(f)),Base.Math.libm), Float64, (Float64,), x)
         ($f)(x::Float32) = ccall(($(string(f,"f")),Base.Math.libm), Float32, (Float32,), x)
         ($f)(x::Real) = ($f)(float(x))
-        function ($f){T<:Number}(x::AbstractArray{T})
+        function ($f)(x::AbstractArray{T}) where T<:Number
             Base.depwarn("$f{T<:Number}(x::AbstractArray{T}) is deprecated, use $f.(x) instead.", $f)
             return ($f).(x)
         end
@@ -38,7 +38,7 @@ using NaNMath as nm
 nm.sum([1., 2., NaN]) # result: 3.0
 ```
 """
-function sum{T<:AbstractFloat}(x::AbstractArray{T})
+function sum(x::AbstractArray{T}) where T<:AbstractFloat
     if length(x) == 0
         result = zero(eltype(x))
     else
@@ -75,7 +75,7 @@ using NaNMath as nm
 nm.maximum([1., 2., NaN]) # result: 2.0
 ```
 """
-function maximum{T<:AbstractFloat}(x::AbstractArray{T})
+function maximum(x::AbstractArray{T}) where T<:AbstractFloat
     result = convert(eltype(x), NaN)
     for i in x
         if !isnan(i)
@@ -102,7 +102,7 @@ using NaNMath as nm
 nm.minimum([1., 2., NaN]) # result: 1.0
 ```
 """
-function minimum{T<:AbstractFloat}(x::AbstractArray{T})
+function minimum(x::AbstractArray{T}) where T<:AbstractFloat
     result = convert(eltype(x), NaN)
     for i in x
         if !isnan(i)
@@ -129,7 +129,7 @@ using NaNMath as nm
 nm.extrema([1., 2., NaN]) # result: 1.0, 2.0
 ```
 """
-function extrema{T<:AbstractFloat}(x::AbstractArray{T})
+function extrema(x::AbstractArray{T}) where T<:AbstractFloat
     resultmin, resultmax = convert(eltype(x), NaN), convert(eltype(x), NaN)
     for i in x
         if !isnan(i)
@@ -159,7 +159,7 @@ using NaNMath as nm
 nm.mean([1., 2., NaN]) # result: 1.5
 ```
 """
-function mean{T<:AbstractFloat}(x::AbstractArray{T})
+function mean(x::AbstractArray{T}) where T<:AbstractFloat
     return mean_count(x)[1]
 end
 
@@ -167,7 +167,7 @@ end
 Returns a tuple of the arithmetic mean of all elements in the array, ignoring NaN's,
 and the number of non-NaN values in the array.
 """
-function mean_count{T<:AbstractFloat}(x::AbstractArray{T})
+function mean_count(x::AbstractArray{T}) where T<:AbstractFloat
     sum = convert(eltype(x), NaN)
     count = 0
     for i in x
@@ -204,7 +204,7 @@ using NaNMath as nm
 nm.var([1., 2., NaN]) # result: 0.5
 ```
 """
-function var{T<:AbstractFloat}(x::Vector{T})
+function var(x::Vector{T}) where T<:AbstractFloat
     mean_val, n = mean_count(x)
     if !isnan(mean_val)
         sum_square = zero(eltype(x))
@@ -238,7 +238,7 @@ using NaNMath as nm
 nm.std([1., 2., NaN]) # result: 0.7071067811865476
 ```
 """
-function std{T<:AbstractFloat}(x::Vector{T})
+function std(x::Vector{T}) where T<:AbstractFloat
     return sqrt(var(x))
 end
 
@@ -259,7 +259,7 @@ julia> NaNMath.min(1, 2)
 1
 ```
 """
-min{T<:AbstractFloat}(x::T, y::T) = ifelse((y < x) | (signbit(y) > signbit(x)),
+min(x::T, y::T) where {T<:AbstractFloat} = ifelse((y < x) | (signbit(y) > signbit(x)),
                                            ifelse(isnan(y), x, y),
                                            ifelse(isnan(x), y, x))
 
@@ -280,7 +280,7 @@ julia> NaNMath.max(1, 2)
 2
 ```
 """
-max{T<:AbstractFloat}(x::T, y::T) = ifelse((y > x) | (signbit(y) < signbit(x)),
+max(x::T, y::T) where {T<:AbstractFloat} = ifelse((y > x) | (signbit(y) < signbit(x)),
                                            ifelse(isnan(y), x, y),
                                            ifelse(isnan(x), y, x))
 
