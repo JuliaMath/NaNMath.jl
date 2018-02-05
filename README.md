@@ -1,3 +1,8 @@
+[![Build Status](https://travis-ci.org/mlubin/NaNMath.jl.svg?branch=master)](https://travis-ci.org/mlubin/NaNMath.jl)
+[![NaNMath](http://pkg.julialang.org/badges/NaNMath_0.6.svg)](http://pkg.julialang.org/detail/NaNMath)
+[![NaNMath](http://pkg.julialang.org/badges/NaNMath_0.7.svg)](http://pkg.julialang.org/detail/NaNMath)
+
+
 # NaNMath
 
 Implementations of basic math functions which return ``NaN`` instead of throwing a ``DomainError``.
@@ -30,4 +35,3 @@ using NaNMath; nm=NaNMath
 nm.sum([1., 2., NaN]) # result: 3.0
 ```
 
-[![Build Status](https://travis-ci.org/mlubin/NaNMath.jl.svg?branch=master)](https://travis-ci.org/mlubin/NaNMath.jl)
