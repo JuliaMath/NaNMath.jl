@@ -1,5 +1,5 @@
 using NaNMath
-using Base.Test
+using Compat.Test
 
 @test isnan(NaNMath.log(-10))
 @test isnan(NaNMath.log1p(-100))
