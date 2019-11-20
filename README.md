@@ -1,6 +1,4 @@
 [![Build Status](https://travis-ci.org/mlubin/NaNMath.jl.svg?branch=master)](https://travis-ci.org/mlubin/NaNMath.jl)
-[![NaNMath](http://pkg.julialang.org/badges/NaNMath_0.6.svg)](http://pkg.julialang.org/detail/NaNMath)
-[![NaNMath](http://pkg.julialang.org/badges/NaNMath_0.7.svg)](http://pkg.julialang.org/detail/NaNMath)
 
 
 # NaNMath

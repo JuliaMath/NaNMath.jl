@@ -1,8 +1,6 @@
 __precompile__()
 module NaNMath
 
-using Compat
-
 const libm = Base.libm_name
 
 for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
@@ -59,7 +57,7 @@ function sum(x::AbstractArray{T}) where T<:AbstractFloat
     end
 
     if isnan(result)
-        Compat.@warn "All elements of the array, passed to \"sum\" are NaN!"
+        @warn "All elements of the array, passed to \"sum\" are NaN!"
     end
     return result
 end
