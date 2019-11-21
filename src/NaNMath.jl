@@ -1,4 +1,3 @@
-__precompile__()
 module NaNMath
 
 const libm = Base.libm_name
