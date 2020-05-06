@@ -35,7 +35,7 @@ NaNMath.sum(A)
 
 ##### Examples:
 ```julia
-using NaNMath as nm
+using NaNMath; const nm = NaNMath
 nm.sum([1., 2., NaN]) # result: 3.0
 ```
 """
@@ -72,7 +72,7 @@ NaNMath.maximum(A)
 
 ##### Examples:
 ```julia
-using NaNMath as nm
+using NaNMath; const nm = NaNMath
 nm.maximum([1., 2., NaN]) # result: 2.0
 ```
 """
@@ -99,7 +99,7 @@ NaNMath.minimum(A)
 
 ##### Examples:
 ```julia
-using NaNMath as nm
+using NaNMath; const nm = NaNMath
 nm.minimum([1., 2., NaN]) # result: 1.0
 ```
 """
@@ -126,7 +126,7 @@ NaNMath.extrema(A)
 
 ##### Examples:
 ```julia
-using NaNMath as nm
+using NaNMath; const nm = NaNMath
 nm.extrema([1., 2., NaN]) # result: 1.0, 2.0
 ```
 """
@@ -156,7 +156,7 @@ NaNMath.mean(A)
 
 ##### Examples:
 ```julia
-using NaNMath as nm
+using NaNMath; const nm = NaNMath
 nm.mean([1., 2., NaN]) # result: 1.5
 ```
 """
@@ -201,7 +201,7 @@ NaNMath.var(A)
 
 ##### Examples:
 ```julia
-using NaNMath as nm
+using NaNMath; const nm = NaNMath
 nm.var([1., 2., NaN]) # result: 0.5
 ```
 """
@@ -235,7 +235,7 @@ NaNMath.std(A)
 
 ##### Examples:
 ```julia
-using NaNMath as nm
+using NaNMath; const nm = NaNMath
 nm.std([1., 2., NaN]) # result: 0.7071067811865476
 ```
 """
@@ -313,3 +313,4 @@ for f in (:min, :max)
 end
 
 end
+
