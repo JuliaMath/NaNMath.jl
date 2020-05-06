@@ -39,27 +39,8 @@ using NaNMath as nm
 nm.sum([1., 2., NaN]) # result: 3.0
 ```
 """
-function sum(x::AbstractArray{T}) where T<:AbstractFloat
-    if length(x) == 0
-        result = zero(eltype(x))
-    else
-        result = convert(eltype(x), NaN)
-        for i in x
-            if !isnan(i)
-                if isnan(result)
-                    result = i
-                else
-                    result += i
-                end
-            end
-        end
-    end
-
-    if isnan(result)
-        @warn "All elements of the array, passed to \"sum\" are NaN!"
-    end
-    return result
-end
+sum(x; kwargs...) = sum(x .* (!isnan).(x); kwargs...)
+sum(f::Function, x; kwargs...) = sum(f.(x); kwargs...)
 
 """
 NaNMath.maximum(A)
