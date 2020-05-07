@@ -35,8 +35,8 @@ NaNMath.sum(A)
 
 ##### Examples:
 ```julia
-using NaNMath; const nm = NaNMath
-nm.sum([1., 2., NaN]) # result: 3.0
+using NaNMath
+NaNMath.sum([1., 2., NaN]) # result: 3.0
 ```
 """
 function sum(x::AbstractArray{T}) where T<:AbstractFloat
@@ -72,8 +72,8 @@ NaNMath.maximum(A)
 
 ##### Examples:
 ```julia
-using NaNMath; const nm = NaNMath
-nm.maximum([1., 2., NaN]) # result: 2.0
+using NaNMath
+NaNMath.maximum([1., 2., NaN]) # result: 2.0
 ```
 """
 function maximum(x::AbstractArray{T}) where T<:AbstractFloat
@@ -99,8 +99,8 @@ NaNMath.minimum(A)
 
 ##### Examples:
 ```julia
-using NaNMath; const nm = NaNMath
-nm.minimum([1., 2., NaN]) # result: 1.0
+using NaNMath
+NaNMath.minimum([1., 2., NaN]) # result: 1.0
 ```
 """
 function minimum(x::AbstractArray{T}) where T<:AbstractFloat
@@ -126,8 +126,8 @@ NaNMath.extrema(A)
 
 ##### Examples:
 ```julia
-using NaNMath; const nm = NaNMath
-nm.extrema([1., 2., NaN]) # result: 1.0, 2.0
+using NaNMath
+NaNMath.extrema([1., 2., NaN]) # result: 1.0, 2.0
 ```
 """
 function extrema(x::AbstractArray{T}) where T<:AbstractFloat
@@ -156,8 +156,8 @@ NaNMath.mean(A)
 
 ##### Examples:
 ```julia
-using NaNMath; const nm = NaNMath
-nm.mean([1., 2., NaN]) # result: 1.5
+using NaNMath
+NaNMath.mean([1., 2., NaN]) # result: 1.5
 ```
 """
 function mean(x::AbstractArray{T}) where T<:AbstractFloat
@@ -201,8 +201,8 @@ NaNMath.var(A)
 
 ##### Examples:
 ```julia
-using NaNMath; const nm = NaNMath
-nm.var([1., 2., NaN]) # result: 0.5
+using NaNMath
+NaNMath.var([1., 2., NaN]) # result: 0.5
 ```
 """
 function var(x::Vector{T}) where T<:AbstractFloat
@@ -235,8 +235,8 @@ NaNMath.std(A)
 
 ##### Examples:
 ```julia
-using NaNMath; const nm = NaNMath
-nm.std([1., 2., NaN]) # result: 0.7071067811865476
+using NaNMath
+NaNMath.std([1., 2., NaN]) # result: 0.7071067811865476
 ```
 """
 function std(x::Vector{T}) where T<:AbstractFloat
