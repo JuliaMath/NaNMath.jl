@@ -87,7 +87,7 @@ function median(x::AbstractVector{<:AbstractFloat})
 
     n = length(x)
     if n == 0
-        return NaN
+        return convert(eltype(x), NaN)
     elseif isodd(n)
         ind = ceil(Int, n/2)
         return x[ind]
@@ -352,4 +352,3 @@ for f in (:min, :max)
 end
 
 end
-
