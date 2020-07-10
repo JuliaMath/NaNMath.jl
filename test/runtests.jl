@@ -25,6 +25,17 @@ using Test
 @test NaNMath.var([1., 2., NaN]) == 0.5
 @test NaNMath.std([1., 2., NaN]) == 0.7071067811865476
 
+@test NaNMath.median([1.]) == 1.
+@test NaNMath.median([1., NaN]) == 1.
+@test NaNMath.median([NaN, 1., 3.]) == 2.
+@test NaNMath.median([1., 3., 2., NaN]) == 2.
+@test NaNMath.median([NaN, 1, 3]) == 2.
+@test NaNMath.median([1, 2, NaN]) == 1.5
+@test NaNMath.median([1 2; NaN NaN]) == 1.5
+@test NaNMath.median([NaN 2; 1 NaN]) == 1.5
+@test isnan(NaNMath.median(Float64[]))
+@test isnan(NaNMath.median([NaN]))
+
 @test NaNMath.min(1, 2) == 1
 @test NaNMath.min(1.0, 2.0) == 1.0
 @test NaNMath.min(1, 2.0) == 1.0
