@@ -72,11 +72,17 @@ NaNMath.median(A)
     Returns NaN for an empty array or array containing NaNs only.
 
 ##### Examples:
-```julia
-using NaNMath
-NaNMath.median([1., 2., 3., NaN]) # result: 2.
-NaNMath.median([1., 2., NaN]) # result: 1.5
-NaNMath.median([NaN]) # result: NaN
+```jldoctest
+julia> using NaNMath
+
+julia> NaNMath.median([1., 2., 3., NaN])
+2.
+
+julia> NaNMath.median([1., 2., NaN])
+1.5
+
+julia> NaNMath.median([NaN])
+NaN
 ```
 """
 median(x::AbstractArray{<:AbstractFloat}) = median(collect(Iterators.flatten(x)))
