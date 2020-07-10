@@ -79,11 +79,9 @@ NaNMath.median([1., 2., NaN]) # result: 1.5
 NaNMath.median([NaN]) # result: NaN
 ```
 """
-function median(x::AbstractArray{T}) where T<:AbstractFloat
+median(x::AbstractArray{<:AbstractFloat}) = median(collect(Iterators.flatten(x)))
 
-    if ndims(x) > 1
-        x = collect(Iterators.flatten(x))
-    end
+function median(x::AbstractVector{<:AbstractFloat})
 
     x = sort(filter(!isnan, x))
 
