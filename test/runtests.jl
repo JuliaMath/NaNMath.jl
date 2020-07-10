@@ -34,6 +34,7 @@ using Test
 @test NaNMath.median([1 2; NaN NaN]) == 1.5
 @test NaNMath.median([NaN 2; 1 NaN]) == 1.5
 @test isnan(NaNMath.median(Float64[]))
+@test isnan(NaNMath.median(Float32[]))
 @test isnan(NaNMath.median([NaN]))
 
 @test NaNMath.min(1, 2) == 1
