@@ -85,8 +85,7 @@ function median(x::AbstractArray{T}) where T<:AbstractFloat
         x = collect(Iterators.flatten(x))
     end
 
-    filter!(el->!isnan(el), x)
-    sort!(x)
+    x = sort(filter(!isnan, x))
 
     n = length(x)
     if n == 0
