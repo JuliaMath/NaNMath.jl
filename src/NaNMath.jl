@@ -63,6 +63,21 @@ end
 
 """
 NaNMath.median(A)
+
+##### Args:
+* `A`: An array of floating point numbers
+
+##### Returns:
+*   Returns the median of all elements in the array, ignoring NaN's.
+    Returns NaN for an empty array or array containing NaNs only.
+
+##### Examples:
+```julia
+using NaNMath
+NaNMath.median([1., 2., 3., NaN]) # result: 2.
+NaNMath.median([1., 2., NaN]) # result: 1.5
+NaNMath.median([NaN]) # result: NaN
+```
 """
 function median(x::AbstractArray{T}) where T<:AbstractFloat
 
