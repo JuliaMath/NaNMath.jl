@@ -62,6 +62,33 @@ function sum(x::AbstractArray{T}) where T<:AbstractFloat
 end
 
 """
+NaNMath.median(A)
+"""
+function median(x::AbstractArray{T}) where T<:AbstractFloat
+
+    if ndims(x) > 1
+        x = collect(Iterators.flatten(x))
+    end
+
+    filter!(el->!isnan(el), x)
+    sort!(x)
+
+    n = length(x)
+    if n == 0
+        return NaN
+    elseif isodd(n)
+        ind = ceil(Int, n/2)
+        return x[ind]
+    else
+        ind = Int(n/2)
+        lower = x[ind]
+        upper = x[ind+1]
+        return (lower + upper) / 2
+    end
+
+end
+
+"""
 NaNMath.maximum(A)
 
 ##### Args:
