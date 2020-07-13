@@ -21,6 +21,7 @@ maximum
 minimum
 extrema
 mean
+median
 var
 std
 min

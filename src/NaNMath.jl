@@ -62,6 +62,51 @@ function sum(x::AbstractArray{T}) where T<:AbstractFloat
 end
 
 """
+NaNMath.median(A)
+
+##### Args:
+* `A`: An array of floating point numbers
+
+##### Returns:
+*   Returns the median of all elements in the array, ignoring NaN's.
+    Returns NaN for an empty array or array containing NaNs only.
+
+##### Examples:
+```jldoctest
+julia> using NaNMath
+
+julia> NaNMath.median([1., 2., 3., NaN])
+2.
+
+julia> NaNMath.median([1., 2., NaN])
+1.5
+
+julia> NaNMath.median([NaN])
+NaN
+```
+"""
+median(x::AbstractArray{<:AbstractFloat}) = median(collect(Iterators.flatten(x)))
+
+function median(x::AbstractVector{<:AbstractFloat})
+
+    x = sort(filter(!isnan, x))
+
+    n = length(x)
+    if n == 0
+        return convert(eltype(x), NaN)
+    elseif isodd(n)
+        ind = ceil(Int, n/2)
+        return x[ind]
+    else
+        ind = Int(n/2)
+        lower = x[ind]
+        upper = x[ind+1]
+        return (lower + upper) / 2
+    end
+
+end
+
+"""
 NaNMath.maximum(A)
 
 ##### Args:
@@ -313,4 +358,3 @@ for f in (:min, :max)
 end
 
 end
-
