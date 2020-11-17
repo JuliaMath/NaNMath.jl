@@ -214,18 +214,12 @@ Returns a tuple of the arithmetic mean of all elements in the array, ignoring Na
 and the number of non-NaN values in the array.
 """
 function mean_count(x::AbstractArray{T}) where T<:AbstractFloat
-    sum = convert(eltype(x), NaN)
+    z = zero(eltype(x))
+    sum = z
     count = 0
-    for i in x
-        if !isnan(i)
-            if isnan(sum)
-                sum = i
-                count = 1
-            else
-                sum += i
-                count += 1
-            end
-        end
+    @simd for i in x
+        count += ifelse(isnan(i), 0, 1)
+        sum += ifelse(isnan(i), z, i)
     end
     result = sum / count
     return (result, count)
