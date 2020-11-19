@@ -1,6 +1,3 @@
-[![Build Status](https://travis-ci.org/mlubin/NaNMath.jl.svg?branch=master)](https://travis-ci.org/mlubin/NaNMath.jl)
-
-
 # NaNMath
 
 Implementations of basic math functions which return ``NaN`` instead of throwing a ``DomainError``.
