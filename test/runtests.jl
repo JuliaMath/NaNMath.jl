@@ -7,6 +7,10 @@ using Test
 @test isnan(NaNMath.pow(-1.5f0,2.3f0))
 @test isnan(NaNMath.pow(-1.5,2.3f0))
 @test isnan(NaNMath.pow(-1.5f0,2.3))
+@test NaNMath.pow(-1.5f0,2.3f0) isa Float32
+@test NaNMath.pow(-1.5f0,2.3) isa Float64
+@test NaNMath.pow(-1.5,2.3f0) isa Float64
+@test NaNMath.pow(-1.5,2.3) isa Float64
 @test isnan(NaNMath.sqrt(-5))
 @test NaNMath.sqrt(5) == Base.sqrt(5)
 @test NaNMath.sum([1., 2., NaN]) == 3.0
