@@ -22,9 +22,10 @@ sqrt(x::Real) = x < 0.0 ? NaN : Base.sqrt(x)
 # Don't override built-in ^ operator
 pow(x::Float64, y::Float64) = ccall((:pow,libm),  Float64, (Float64,Float64), x, y)
 pow(x::Float32, y::Float32) = ccall((:powf,libm), Float32, (Float32,Float32), x, y)
-# Need `promote` here, otherwise we'll end up with an infinite recursion
-# in the case of `x` and `y` being different floating types.
-pow(x::Number, y::Number) = pow(promote(float(x), float(y))...)
+# We `promote` first before converting to floating pointing numbers to ensure that
+# e.g. `pow(::Float32, ::Int)` ends up calling `pow(::Float32, ::Float32)`
+pow(x::Number, y::Number) = pow(promote(x, y)...)
+pow(x::T, y::T) where {T<:Number} = pow(float(x), float(y))
 
 """
 NaNMath.sum(A)
