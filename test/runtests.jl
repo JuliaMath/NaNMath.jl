@@ -7,8 +7,13 @@ using Test
 @test isnan(NaNMath.pow(-1.5f0,2.3f0))
 @test isnan(NaNMath.pow(-1.5,2.3f0))
 @test isnan(NaNMath.pow(-1.5f0,2.3))
+@test NaNMath.pow(-1,2) isa Float64
+@test NaNMath.pow(-1.5f0,2) isa Float32
+@test NaNMath.pow(-1.5f0,2//1) isa Float32
 @test NaNMath.pow(-1.5f0,2.3f0) isa Float32
 @test NaNMath.pow(-1.5f0,2.3) isa Float64
+@test NaNMath.pow(-1.5,2) isa Float64
+@test NaNMath.pow(-1.5,2//1) isa Float64
 @test NaNMath.pow(-1.5,2.3f0) isa Float64
 @test NaNMath.pow(-1.5,2.3) isa Float64
 @test isnan(NaNMath.sqrt(-5))
