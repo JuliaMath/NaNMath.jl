@@ -417,7 +417,7 @@ function _findminmax_op(cmp)
 end
 
 function _findminmax(cmp, f, x)
-    return mapreduce(_findminmax_op(cmp), pairs(x)) do (k, xk)
+    return mapfoldl(_findminmax_op(cmp), pairs(x)) do (k, xk)
         return f(xk), k
     end
 end
