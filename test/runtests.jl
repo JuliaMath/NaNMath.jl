@@ -78,13 +78,15 @@ using Test
         [missing, 1.0],
         [1.0, missing],
         (1., 2, 3., 3, 1),
+        (x=1, y=3, z=-4, w=-2),
+        Dict(:a => 1.0, :b => 1.0, :d => 3.0, :c => 2.0),
     ]
     @testset for x in xvals
         @test NaNMath.findmin(x) === findmin(x)
-        @test NaNMath.findmin(identity, x) === findmin(identity, x)
-        @test NaNMath.findmin(sin, x) === findmin(sin, x)
         @test NaNMath.findmax(x) === findmax(x)
+        @test NaNMath.findmin(identity, x) === findmin(identity, x)
         @test NaNMath.findmax(identity, x) === findmax(identity, x)
+        @test NaNMath.findmin(sin, x) === findmin(sin, x)
         @test NaNMath.findmax(sin, x) === findmax(sin, x)
     end
     x = [7, 7, NaN, 1, 1, NaN]
@@ -110,6 +112,14 @@ using Test
     @test NaNMath.findmax(identity, x) === (missing, 2)
     @test NaNMath.findmin(sin, x) === (missing, 2)
     @test NaNMath.findmax(sin, x) === (missing, 2)
+
+    x = Dict(:x => 3, :w => 2, :y => -1.0, :z => NaN)
+    @test NaNMath.findmin(x) === (-1.0, :y)
+    @test NaNMath.findmax(x) === (3, :x)
+    @test NaNMath.findmin(identity, x) === (-1.0, :y)
+    @test NaNMath.findmax(identity, x) === (3, :x)
+    @test NaNMath.findmin(-, x) === (-3, :x)
+    @test NaNMath.findmax(-, x) === (1.0, :y)
 end
 
 @testset "argmin/argmax" begin
@@ -119,14 +129,16 @@ end
         [missing, 1.0],
         [1.0, missing],
         (1., 2, 3., 3, 1),
+        (x=1, y=3, z=-4, w=-2),
+        Dict(:a => 1.0, :b => 1.0, :d => 3.0, :c => 2.0),
     ]
     @testset for x in xvals
         @test NaNMath.argmin(x) === argmin(x)
-        @test NaNMath.argmin(identity, x) === argmin(identity, x)
-        @test NaNMath.argmin(sin, x) === argmin(sin, x)
         @test NaNMath.argmax(x) === argmax(x)
+        @test NaNMath.argmin(identity, x) === argmin(identity, x)
         @test NaNMath.argmax(identity, x) === argmax(identity, x)
-        @test NaNMath.argmax(sin, x) === argmax(sin, x)
+        x isa Dict || @test NaNMath.argmin(sin, x) === argmin(sin, x)
+        x isa Dict || @test NaNMath.argmax(sin, x) === argmax(sin, x)
     end
     x = [7, 7, NaN, 1, 1, NaN]
     @test NaNMath.argmin(x) === 4
@@ -151,4 +163,10 @@ end
     @test NaNMath.argmax(identity, x) === missing
     @test NaNMath.argmin(-, x) === missing
     @test NaNMath.argmax(-, x) === missing
+
+    x = Dict(:x => 3, :w => 2, :z => -1.0, :y => NaN)
+    @test NaNMath.argmin(x) === :z
+    @test NaNMath.argmax(x) === :x
+    @test NaNMath.argmin(identity, x) === argmin(identity, x)
+    @test NaNMath.argmax(identity, x) === argmax(identity, x)
 end
