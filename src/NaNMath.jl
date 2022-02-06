@@ -422,4 +422,96 @@ function _findminmax(cmp, f, x)
     end
 end
 
+"""
+    NaNMath.argmin(f, domain) -> x
+
+##### Args:
+* `f`: A function applied to the values of `domain`
+* `domain`: A non-empty iterable of floating point numbers or `Missing`.
+
+##### Returns:
+* Returns a value `x` in the domain of `f` for which `f(x)` is minimised. If there are
+multiple minimal values for `f(x)`, then the first one will be found. `NaN`s are treated as
+less than all other values.
+
+##### Examples:
+```julia
+julia> NaNMath.argmin(abs, [1., -1., -2., 2., NaN])
+1.0
+
+julia> NaNMath.argmin(identity, [7, 1, 1, NaN])
+1.0
+```
+
+    NaNMath.argmin(itr) -> key
+
+##### Args:
+* `itr`: A non-empty iterable of floating point numbers or `Missing`.
+
+##### Returns:
+* Returns the index or key of the minimal element in `itr`. If there are multiple
+minimal elements, then the first one will be returned
+
+##### Examples:
+```julia
+julia> NaNMath.argmin([7, 1, 1, NaN])
+2
+
+julia> NaNMath.argmin([1.0 2; 3 NaN])
+CartesianIndex(1, 1)
+
+julia> NaNMath.argmin(Dict("x" => 1.0, "y" => -1, "z" => NaN))
+"y"
+```
+"""
+function argmin end
+argmin(x) = findmin(identity, x)[2]
+argmin(f, x) = mapfoldl(x -> (f(x), x), _findminmax_op(Base.isgreater), x)[2]
+
+"""
+    NaNMath.argmax(f, domain) -> x
+
+##### Args:
+* `f`: A function applied to the values of `domain`
+* `domain`: A non-empty iterable of floating point numbers or `Missing`.
+
+##### Returns:
+* Returns a value `x` in the domain of `f` for which `f(x)` is maximised. If there are
+multiple minimal values for `f(x)`, then the first one will be found. `NaN`s are treated as
+greater than all other values.
+
+##### Examples:
+```julia
+julia> NaNMath.argmax(abs, [1., -1., -2., NaN])
+2.0
+
+julia> NaNMath.argmax(identity, [7, 1, 1, NaN])
+7.0
+```
+
+    NaNMath.argmax(itr) -> key
+
+##### Args:
+* `itr`: A non-empty iterable of floating point numbers or `Missing`.
+
+##### Returns:
+* Returns the index or key of the maximal element in `itr`. If there are multiple
+maximal elements, then the first one will be returned
+
+##### Examples:
+```julia
+julia> NaNMath.argmax([7, 1, 1, NaN])
+1
+
+julia> NaNMath.argmax([1.0 2; 3 NaN])
+CartesianIndex(2, 1)
+
+julia> NaNMath.argmax(Dict("x" => 1.0, "y" => -1, "z" => NaN))
+"x"
+```
+"""
+function argmax end
+argmax(x) = findmax(identity, x)[2]
+argmax(f, x) = mapfoldl(x -> (f(x), x), _findminmax_op(Base.isless), x)[2]
+
 end
