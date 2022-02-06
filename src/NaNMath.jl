@@ -412,7 +412,7 @@ function _findminmax_op(cmp)
         x1 === missing && return x1_i1
         x2 = first(x2_i2)
         x2 === missing && return x2_i2
-        return ifelse(isnan(x2) || x1 == x2 || cmp(x2, x1), x1_i1, x2_i2)
+        return ifelse((x1 isa Number && isnan(x2)) || !cmp(x1, x2), x1_i1, x2_i2)
     end
 end
 
