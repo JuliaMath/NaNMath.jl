@@ -354,4 +354,72 @@ for f in (:min, :max)
     @eval ($f)(a, b, c, xs...) = Base.afoldl($f, ($f)(($f)(a, b), c), xs...)
 end
 
+"""
+    NaNMath.findmin([f,] domain) -> (f(x), index)
+
+##### Args:
+* `f`: a function applied to the values in `domain`
+* `domain`: A non-empty iterable of floating point numbers or `Missing`.
+
+##### Returns:
+* Returns a pair of a value in the codomain (outputs of `f`, defaulting to `identity`) and
+the index of the corresponding value in the `domain` (inputs to `f`) such that `f(x)` is
+minimized. If there are multiple minimal points, then the first one will be returned. `NaN`s
+are treated as greater than all other values.
+
+##### Examples:
+```julia
+julia> NaNMath.findmin([1., 1., 2., 2., NaN])
+(1.0, 1)
+
+julia> NaNMath.findmin(-, [1., 1., 2., 2., NaN])
+(-2.0, 3)
+```
+"""
+function findmin end
+findmin(f, x) = _findminmax(Base.isgreater, f, x)
+findmin(x) = findmin(identity, x)
+
+"""
+    NaNMath.findmax([f,] domain) -> (f(x), index)
+
+##### Args:
+* `f`: a function applied to the values in `domain`
+* `domain`: A non-empty iterable of floating point numbers or `Missing`.
+
+##### Returns:
+* Returns a pair of a value in the codomain (outputs of `f`, defaulting to `identity`) and
+the index of the corresponding value in the `domain` (inputs to `f`) such that `f(x)` is
+maximized. If there are multiple minimal points, then the first one will be returned. `NaN`s
+are treated as less than all other values.
+
+##### Examples:
+```julia
+julia> NaNMath.findmax([1., 1., 2., 2., NaN])
+(2.0, 3)
+
+julia> NaNMath.findmax(-, [1., 1., 2., 2., NaN])
+(-1.0, 1)
+```
+"""
+function findmax end
+findmax(f, x) = _findminmax(Base.isless, f, x)
+findmax(x) = findmax(identity, x)
+
+function _findminmax_op(cmp)
+    return (x1_i1, x2_i2) -> begin
+        x1 = first(x1_i1)
+        x1 === missing && return x1_i1
+        x2 = first(x2_i2)
+        x2 === missing && return x2_i2
+        return ifelse(isnan(x2) || x1 == x2 || cmp(x2, x1), x1_i1, x2_i2)
+    end
+end
+
+function _findminmax(cmp, f, x)
+    return mapreduce(_findminmax_op(cmp), pairs(x)) do (k, xk)
+        return f(xk), k
+    end
+end
+
 end
