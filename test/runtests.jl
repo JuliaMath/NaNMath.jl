@@ -120,6 +120,12 @@ using Test
     @test NaNMath.findmax(identity, x) === (3, :x)
     @test NaNMath.findmin(-, x) === (-3, :x)
     @test NaNMath.findmax(-, x) === (1.0, :y)
+
+    x = Dict(:x => :a, :w => :b, :y => :c, :z => :d)
+    y = Dict(:a => 3, :b => 2, :c => -1.0, :d => NaN)
+    f = k -> y[k]
+    @test NaNMath.findmin(f, x) === (-1.0, :y)
+    @test NaNMath.findmax(f, x) === (3, :x)
 end
 
 @testset "argmin/argmax" begin
@@ -169,4 +175,10 @@ end
     @test NaNMath.argmax(x) === :x
     @test NaNMath.argmin(identity, x) === argmin(identity, x)
     @test NaNMath.argmax(identity, x) === argmax(identity, x)
+
+    x = (:a, :b, :c, :d)
+    y = Dict(:a => 3, :b => 2, :c => -1.0, :d => NaN)
+    f = k -> y[k]
+    @test NaNMath.argmin(f, x) === :c
+    @test NaNMath.argmax(f, x) === :a
 end
