@@ -358,14 +358,15 @@ end
     NaNMath.findmin([f,] domain) -> (f(x), index)
 
 ##### Args:
-* `f`: a function applied to the values in `domain`
-* `domain`: A non-empty iterable of floating point numbers or `Missing`.
+* `f`: a function applied to the values in `domain` (defaulting to `identity`)
+* `domain`: A non-empty iterable such that the codomain (outputs of `f` applied to `domain`)
+are floating point numbers or `missing`
 
 ##### Returns:
-* Returns a pair of a value in the codomain (outputs of `f`, defaulting to `identity`) and
-the index of the corresponding value in the `domain` (inputs to `f`) such that `f(x)` is
-minimized. If there are multiple minimal points, then the first one will be returned. `NaN`s
-are treated as greater than all other values.
+* Returns a pair of a value in the codomain and the index of the corresponding value in the
+`domain` (inputs to `f`) such that `f(x)` is minimized. If there are multiple minimal
+points, then the first one will be returned. `NaN`s are treated as greater than all other
+values.
 
 ##### Examples:
 ```julia
@@ -384,14 +385,15 @@ findmin(x) = findmin(identity, x)
     NaNMath.findmax([f,] domain) -> (f(x), index)
 
 ##### Args:
-* `f`: a function applied to the values in `domain`
-* `domain`: A non-empty iterable of floating point numbers or `Missing`.
+* `f`: a function applied to the values in `domain` (defaulting to `identity`)
+* `domain`: A non-empty iterable such that the codomain (outputs of `f` applied to `domain`)
+are floating point numbers or `missing`
 
 ##### Returns:
-* Returns a pair of a value in the codomain (outputs of `f`, defaulting to `identity`) and
-the index of the corresponding value in the `domain` (inputs to `f`) such that `f(x)` is
-maximized. If there are multiple minimal points, then the first one will be returned. `NaN`s
-are treated as less than all other values.
+* Returns a pair of a value in the codomain and the index of the corresponding value in the
+`domain` (inputs to `f`) such that `f(x)` is maximized. If there are multiple maximal
+points, then the first one will be returned. `NaN`s are treated as less than all other
+values.
 
 ##### Examples:
 ```julia
@@ -431,12 +433,13 @@ end
 
 ##### Args:
 * `f`: A function applied to the values of `domain`
-* `domain`: A non-empty iterable of floating point numbers or `Missing`.
+* `domain`: A non-empty iterable such that the codomain (outputs of `f` applied to `domain`)
+are floating point numbers or `missing`
 
 ##### Returns:
-* Returns a value `x` in the domain of `f` for which `f(x)` is minimised. If there are
+* Returns a value `x` in the domain of `f` for which `f(x)` is minimized. If there are
 multiple minimal values for `f(x)`, then the first one will be found. `NaN`s are treated as
-less than all other values.
+greater than all other values.
 
 ##### Examples:
 ```julia
@@ -450,7 +453,7 @@ julia> NaNMath.argmin(identity, [7, 1, 1, NaN])
     NaNMath.argmin(itr) -> key
 
 ##### Args:
-* `itr`: A non-empty iterable of floating point numbers or `Missing`.
+* `itr`: A non-empty iterable of floating point numbers or `missing`.
 
 ##### Returns:
 * Returns the index or key of the minimal element in `itr`. If there are multiple
@@ -477,12 +480,13 @@ argmin(f, x) = mapfoldl(x -> (f(x), x), _findminmax_op(Base.isgreater), x)[2]
 
 ##### Args:
 * `f`: A function applied to the values of `domain`
-* `domain`: A non-empty iterable of floating point numbers or `Missing`.
+* `domain`: A non-empty iterable such that the codomain (outputs of `f` applied to `domain`)
+are floating point numbers or `missing`
 
 ##### Returns:
-* Returns a value `x` in the domain of `f` for which `f(x)` is maximised. If there are
-multiple minimal values for `f(x)`, then the first one will be found. `NaN`s are treated as
-greater than all other values.
+* Returns a value `x` in the domain of `f` for which `f(x)` is maximized. If there are
+multiple maximal values for `f(x)`, then the first one will be found. `NaN`s are treated as
+less than all other values.
 
 ##### Examples:
 ```julia
@@ -496,7 +500,7 @@ julia> NaNMath.argmax(identity, [7, 1, 1, NaN])
     NaNMath.argmax(itr) -> key
 
 ##### Args:
-* `itr`: A non-empty iterable of floating point numbers or `Missing`.
+* `itr`: A non-empty iterable of floating point numbers or `missing`.
 
 ##### Returns:
 * Returns the index or key of the maximal element in `itr`. If there are multiple
