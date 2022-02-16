@@ -81,7 +81,7 @@ using Test
         (x=1, y=3, z=-4, w=-2),
         Dict(:a => 1.0, :b => 1.0, :d => 3.0, :c => 2.0),
     ]
-    @testset for x in xvals
+    VERSION ≥ v"1.7" && @testset for x in xvals
         @test NaNMath.findmin(x) === findmin(x)
         @test NaNMath.findmax(x) === findmax(x)
         @test NaNMath.findmin(identity, x) === findmin(identity, x)
@@ -138,7 +138,7 @@ end
         (x=1, y=3, z=-4, w=-2),
         Dict(:a => 1.0, :b => 1.0, :d => 3.0, :c => 2.0),
     ]
-    @testset for x in xvals
+    VERSION ≥ v"1.7" && @testset for x in xvals
         @test NaNMath.argmin(x) === argmin(x)
         @test NaNMath.argmax(x) === argmax(x)
         @test NaNMath.argmin(identity, x) === argmin(identity, x)
@@ -173,8 +173,10 @@ end
     x = Dict(:x => 3, :w => 2, :z => -1.0, :y => NaN)
     @test NaNMath.argmin(x) === :z
     @test NaNMath.argmax(x) === :x
-    @test NaNMath.argmin(identity, x) === argmin(identity, x)
-    @test NaNMath.argmax(identity, x) === argmax(identity, x)
+    if VERSION ≥ v"1.7"
+        @test NaNMath.argmin(identity, x) === argmin(identity, x)
+        @test NaNMath.argmax(identity, x) === argmax(identity, x)
+    end
 
     x = (:a, :b, :c, :d)
     y = Dict(:a => 3, :b => 2, :c => -1.0, :d => NaN)
