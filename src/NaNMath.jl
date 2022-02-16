@@ -366,7 +366,7 @@ are floating point numbers or `missing`
 * Returns a pair of a value in the codomain and the index of the corresponding value in the
 `domain` (inputs to `f`) such that `f(x)` is minimized. If there are multiple minimal
 points, then the first one will be returned. `NaN`s are treated as greater than all other
-values.
+values, while `missing` is treated as less than all other values.
 
 ##### Examples:
 ```julia
@@ -393,7 +393,7 @@ are floating point numbers or `missing`
 * Returns a pair of a value in the codomain and the index of the corresponding value in the
 `domain` (inputs to `f`) such that `f(x)` is maximized. If there are multiple maximal
 points, then the first one will be returned. `NaN`s are treated as less than all other
-values.
+values, while `missing` is treated as greater than all other values.
 
 ##### Examples:
 ```julia
@@ -439,7 +439,7 @@ are floating point numbers or `missing`
 ##### Returns:
 * Returns a value `x` in the domain of `f` for which `f(x)` is minimized. If there are
 multiple minimal values for `f(x)`, then the first one will be found. `NaN`s are treated as
-greater than all other values.
+greater than all other values, while `missing` is treated as less than all other values.
 
 ##### Examples:
 ```julia
@@ -486,7 +486,7 @@ are floating point numbers or `missing`
 ##### Returns:
 * Returns a value `x` in the domain of `f` for which `f(x)` is maximized. If there are
 multiple maximal values for `f(x)`, then the first one will be found. `NaN`s are treated as
-less than all other values.
+less than all other values, while `missing` is treated as greater than all other values.
 
 ##### Examples:
 ```julia
