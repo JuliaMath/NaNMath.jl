@@ -407,12 +407,16 @@ findmax(f, x) = _findminmax(Base.isless, f, x)
 findmax(x) = findmax(identity, x)
 
 function _findminmax_op(cmp)
-    return (x1_i1, x2_i2) -> begin
-        x1 = first(x1_i1)
-        x1 === missing && return x1_i1
-        x2 = first(x2_i2)
-        x2 === missing && return x2_i2
-        return ifelse((x1 isa Number && isnan(x2)) || !cmp(x1, x2), x1_i1, x2_i2)
+    return (xleft_and_index, xright_and_index) -> begin
+        xleft = first(xleft_and_index)
+        xleft === missing && return xleft_and_index
+        xright = first(xright_and_index)
+        xright === missing && return xright_and_index
+        return ifelse(
+            (xleft isa Number && isnan(xright)) || !cmp(xleft, xright),
+            xleft_and_index,
+            xright_and_index,
+        )
     end
 end
 
