@@ -1,5 +1,7 @@
 # NaNMath
 
+[![deps](https://juliahub.com/docs/NaNMath/deps.svg)](https://juliahub.com/ui/Packages/NaNMath/k9Y1O?t=2)
+
 Implementations of basic math functions which return ``NaN`` instead of throwing a ``DomainError``.
 
 Example:
