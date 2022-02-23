@@ -72,22 +72,24 @@ using Test
 @test NaNMath.max(NaN, NaN, 0.0, 1.0) == 1.0
 
 @testset "findmin/findmax" begin
-    xvals = [
-        [1., 2., 3., 3., 1.],
-        [missing, missing],
-        [missing, 1.0],
-        [1.0, missing],
-        (1., 2, 3., 3, 1),
-        (x=1, y=3, z=-4, w=-2),
-        Dict(:a => 1.0, :b => 1.0, :d => 3.0, :c => 2.0),
-    ]
-    VERSION ≥ v"1.7" && @testset for x in xvals
-        @test NaNMath.findmin(x) === findmin(x)
-        @test NaNMath.findmax(x) === findmax(x)
-        @test NaNMath.findmin(identity, x) === findmin(identity, x)
-        @test NaNMath.findmax(identity, x) === findmax(identity, x)
-        @test NaNMath.findmin(sin, x) === findmin(sin, x)
-        @test NaNMath.findmax(sin, x) === findmax(sin, x)
+    if VERSION ≥ v"1.7"
+        xvals = [
+            [1., 2., 3., 3., 1.],
+            [missing, missing],
+            [missing, 1.0],
+            [1.0, missing],
+            (1., 2, 3., 3, 1),
+            (x=1, y=3, z=-4, w=-2),
+            Dict(:a => 1.0, :b => 1.0, :d => 3.0, :c => 2.0),
+        ]
+        @testset for x in xvals
+            @test NaNMath.findmin(x) === findmin(x)
+            @test NaNMath.findmax(x) === findmax(x)
+            @test NaNMath.findmin(identity, x) === findmin(identity, x)
+            @test NaNMath.findmax(identity, x) === findmax(identity, x)
+            @test NaNMath.findmin(sin, x) === findmin(sin, x)
+            @test NaNMath.findmax(sin, x) === findmax(sin, x)
+        end
     end
     x = [7, 7, NaN, 1, 1, NaN]
     @test NaNMath.findmin(x) === (1.0, 4)
@@ -129,22 +131,24 @@ using Test
 end
 
 @testset "argmin/argmax" begin
-    xvals = [
-        [1., 2., 3., 3., 1.],
-        [missing, missing],
-        [missing, 1.0],
-        [1.0, missing],
-        (1., 2, 3., 3, 1),
-        (x=1, y=3, z=-4, w=-2),
-        Dict(:a => 1.0, :b => 1.0, :d => 3.0, :c => 2.0),
-    ]
-    VERSION ≥ v"1.7" && @testset for x in xvals
-        @test NaNMath.argmin(x) === argmin(x)
-        @test NaNMath.argmax(x) === argmax(x)
-        @test NaNMath.argmin(identity, x) === argmin(identity, x)
-        @test NaNMath.argmax(identity, x) === argmax(identity, x)
-        x isa Dict || @test NaNMath.argmin(sin, x) === argmin(sin, x)
-        x isa Dict || @test NaNMath.argmax(sin, x) === argmax(sin, x)
+    if VERSION ≥ v"1.7"
+        xvals = [
+            [1., 2., 3., 3., 1.],
+            [missing, missing],
+            [missing, 1.0],
+            [1.0, missing],
+            (1., 2, 3., 3, 1),
+            (x=1, y=3, z=-4, w=-2),
+            Dict(:a => 1.0, :b => 1.0, :d => 3.0, :c => 2.0),
+        ]    
+        @testset for x in xvals
+            @test NaNMath.argmin(x) === argmin(x)
+            @test NaNMath.argmax(x) === argmax(x)
+            @test NaNMath.argmin(identity, x) === argmin(identity, x)
+            @test NaNMath.argmax(identity, x) === argmax(identity, x)
+            x isa Dict || @test NaNMath.argmin(sin, x) === argmin(sin, x)
+            x isa Dict || @test NaNMath.argmax(sin, x) === argmax(sin, x)
+        end
     end
     x = [7, 7, NaN, 1, 1, NaN]
     @test NaNMath.argmin(x) === 4
