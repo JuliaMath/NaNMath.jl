@@ -1,6 +1,7 @@
 module NaNMath
 
-const libm = Base.libm_name
+using OpenLibm_jll
+const libm = OpenLibm_jll.libopenlibm
 
 for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
           :lgamma, :log1p)
