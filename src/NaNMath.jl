@@ -212,6 +212,27 @@ NaNMath.mean([1., 2., NaN]) # result: 1.5
 function mean(x::AbstractArray{T}) where T<:AbstractFloat
     return mean_count(x)[1]
 end
+          
+"""
+NaNMath.mean(A, W)
+
+##### Args:
+* `A`: An array of floating point numbers
+* `W`: An array of floating point weights corresponding to the values of `A`
+
+##### Returns:
+*    Returns the arithmetic weighted mean of all elements in the array, ignoring NaN's.
+
+##### Examples:
+```julia
+using NaNMath
+NaNMath.mean([1., 2., NaN], [1., .5, 1]) # result: 1.0
+```
+"""
+function mean(x::AbstractArray{T}, w::AbstractArray{T}) where T<:AbstractFloat
+    return mean_count(x, w)[1]
+end
+
 
 """
 Returns a tuple of the arithmetic mean of all elements in the array, ignoring NaN's,
@@ -224,6 +245,22 @@ function mean_count(x::AbstractArray{T}) where T<:AbstractFloat
     @simd for i in x
         count += ifelse(isnan(i), 0, 1)
         sum += ifelse(isnan(i), z, i)
+    end
+    result = sum / count
+    return (result, count)
+end
+
+"""
+Returns a tuple of the arithmetic mean of all elements in the array, ignoring NaN's,
+and the sum of weights of non-NaN values and non-NaN weights in the array.
+"""
+function mean_count(x::AbstractArray{T}, w::AbstractArray{T}) where T<:AbstractFloat
+    zx, zw = zero(eltype(x)), zero(eltype(z))
+    sum = zx
+    weightsum = zw
+    @simd for i, j in zip(x, w)
+        weightsum += ifelse(isnan(i)||isnan(j), zw, j)
+        sum += ifelse(isnan(i)||isnan(j), z, i)
     end
     result = sum / count
     return (result, count)
