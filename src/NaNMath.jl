@@ -9,10 +9,6 @@ for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
         ($f)(x::Float64) = ccall(($(string(f)),libm), Float64, (Float64,), x)
         ($f)(x::Float32) = ccall(($(string(f,"f")),libm), Float32, (Float32,), x)
         ($f)(x::Real) = ($f)(float(x))
-        function ($f)(x::AbstractArray{T}) where T<:Number
-            Base.depwarn("$f{T<:Number}(x::AbstractArray{T}) is deprecated, use $f.(x) instead.", $f)
-            return ($f).(x)
-        end
     end
 end
 
