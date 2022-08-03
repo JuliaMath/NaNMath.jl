@@ -19,6 +19,10 @@ sum
 maximum
 minimum
 extrema
+argmax
+argmin
+findmax
+findmin
 mean
 median
 var
