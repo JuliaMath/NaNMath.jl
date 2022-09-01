@@ -351,4 +351,220 @@ for f in (:min, :max)
     @eval ($f)(a, b, c, xs...) = Base.afoldl($f, ($f)(($f)(a, b), c), xs...)
 end
 
+# The functions `findmin`, `findmax`, `argmin`, and `argmax` are supported 
+# to work correctly for the following iterable types:
+_valtype(x::AbstractArray{T}) where T<:AbstractFloat = eltype(x)
+_valtype(x::Tuple{Vararg{T} where T<:AbstractFloat})  = eltype(x)
+_valtype(x::NamedTuple{syms, <:Tuple{Vararg{T} where T<:AbstractFloat}}) where {syms} = eltype(x)
+_valtype(x::AbstractDict{K,T}) where {K,T<:AbstractFloat} = valtype(x)
+_valtype(x) = error(
+    "Iterables with value type AbstractFloat or its subtypes are supported.
+    The provided input type $(typeof(x)) is not.
+    Consider using the convert function before passing the iterable argument."
+
+)
+
+function _find_extreme(f,compare_op::Function, x)
+    result_index = 1 # Note: default index value.
+    result_value = convert(_valtype(x), NaN)
+
+    for (k, v) in pairs(x)
+        if !isnan(v)
+            if (isnan(result_value) || compare_op(f(v),f(result_value)))
+                result_index = k
+                result_value = v
+            end
+        end
+    end
+    return f(result_value), result_index
+end
+
+"""
+    NaNMath.findmin(f, domain) -> (f(x), index)
+
+    NaNMath.findmin(domain) -> (x, index)
+
+##### Args:
+* `f`: A function applied to the elements of `domain`; 
+  defaults to `identity` when `domain` is the only argument.
+* `domain`: A non-empty collection of floating point numbers such that
+  `f` is defined on elements of `domain`.
+
+##### Returns:
+* Returns a `Tuple` consisting of a value `f(x)` and the index of `x`
+  in `domain`, ignoring NaN's, such that `f(x)` is minimized.
+  If there are multiple minimal elements, then the first one will be returned.
+
+If `domain` is a `NamedTuple` or dictionary-like `AbstractDict` L,
+the function is applied to its values.  The returned index is a key `k`,
+such that `f(L[k])` is minimized.
+
+##### Examples:
+```julia
+julia> NaNMath.findmin([1., 1., 2., 2., NaN])
+(1.0, 1)
+
+julia> NaNMath.findmin(-, [1., 1., 2., 2., NaN])
+(-2.0, 3)
+
+julia> NaNMath.findmin(abs, Dict(:x => 3.0, :w => -2.2, :y => -3.0, :z => NaN))
+(2.2, :w)
+```
+"""
+function findmin end
+findmin(f,x) = _find_extreme(f,<,x)
+findmin(x) = findmin(identity,x)
+
+"""
+    NaNMath.findmax(f, domain) -> (f(x), index)
+
+    NaNMath.findmax(domain) -> (x, index)
+
+##### Args:
+* `f`: A function applied to the elements of `domain`; 
+  defaults to `identity` when `domain` is the only argument.
+* `domain`: A non-empty collection of floating point numbers such that
+  `f` is defined on elements of `domain`.
+
+##### Returns:
+* Returns a `Tuple` consisting of a value `f(x)` and the index of `x`
+  in `domain`, ignoring NaN's, such that `f(x)` is maximized.
+  If there are multiple maximal elements, then the first one will be returned.
+
+If `domain` is a `NamedTuple` or dictionary-like `AbstractDict` L,
+the function `f` is applied to its values.  The returned index is a key `k`,
+such that `f(L[k])` is maximized.
+
+##### Examples:
+```julia
+julia> NaNMath.findmax([1., 1., 2., 2., NaN])
+(2.0, 3)
+
+julia> NaNMath.findmax(-, [1., 1., 2., 2., NaN])
+(-1.0, 1)
+
+julia> NaNMath.findmax(abs, Dict(:x => 3.0, :w => -2.2, :y => -3.0, :z => NaN))
+(3.0, :y)
+```
+"""
+function findmax end
+findmax(f,x) = _find_extreme(f,>,x)
+findmax(x) = findmax(identity,x) 
+
+"""
+    NaNMath.argmin(f, domain) -> x
+
+##### Args:
+* `f`: A function applied to the elements of `domain`; 
+  defaults to `identity` when `domain` is the only argument.
+* `domain`: A non-empty collection of floating point numbers such that
+  `f` is defined on elements of `domain`.
+
+##### Returns:
+* Returns a value `x` in `domain`, ignoring NaN's, for which `f(x)` is minimized.
+  If there are multiple minimal values for `f(x)`, then the first one will be returned.
+
+If `domain` is a `NamedTuple` or dictionary-like `AbstractDict` L,
+the function is applied to its values.  The returned value is `L[k]` for some key `k`
+such that `f(L[k])` is minimal.
+
+##### Examples:
+```julia
+julia> NaNMath.argmin(abs, [1., -1., -2., 2., NaN])
+1.0
+
+julia> NaNMath.argmin(identity, [7, 1, 1, NaN])
+1.0
+```
+
+julia> NaNMath.argmin(exp,Dict("x" => 1.0, "y" => -1.2, "z" => NaN))
+-1.2
+
+───────────────────────────────────────────────────────────
+
+    NaNMath.argmin(itr) -> key
+
+##### Args:
+* `itr`: A non-empty iterable of floating point numbers.
+
+##### Returns:
+* Returns the index or key of the minimal element in `itr`, ignoring NaN's.
+  If there are multiple minimal elements, then the first one will be returned.
+
+If `itr` is a `NamedTuple` or dictionary-like `AbstractDict` L, the returned index is a key `k`,
+such that `f(L[k])` is minimal.
+
+##### Examples:
+```julia
+julia> NaNMath.argmin([7, 1, 1, NaN])
+2
+
+julia> NaNMath.argmin([1.0 2; 3 NaN])
+CartesianIndex(1, 1)
+
+julia> NaNMath.argmin(Dict("x" => 1.0, "y" => -1.2, "z" => NaN))
+"y"
+```
+"""
+function argmin end
+argmin(f,x) = getindex(x,findmin(f,x)[2])
+argmin(x) = findmin(identity,x)[2]
+
+"""
+    NaNMath.argmax(f, domain) -> x
+
+##### Args:
+* `f`: A function applied to the elements of `domain`; 
+  defaults to `identity` when `domain` is the only argument.
+* `domain`: A non-empty collection of floating point numbers such that
+  `f` is defined on elements of `domain`.
+
+##### Returns:
+* Returns a value `x` in `domain`, ignoring NaN's, for which `f(x)` is maximized.
+  If there are multiple maximal values for `f(x)`, then the first one will be returned.
+
+If `domain` is a `NamedTuple` or dictionary-like `AbstractDict` L,
+the function is applied to its values.  The returned value is `L[k]` for some key `k`
+such that `f(L[k])` is maximal.
+
+##### Examples:
+```julia
+julia> NaNMath.argmax(abs, [1., -1., -2., NaN])
+-2.0
+
+julia> NaNMath.argmax(identity, [7, 1, 1, NaN])
+7.0
+```
+
+───────────────────────────────────────────────────────────
+
+    NaNMath.argmax(itr) -> key
+
+##### Args:
+* `itr`: A non-empty iterable of floating point numbers.
+
+##### Returns:
+* Returns the index or key of the maximal element in `itr`, ignoring NaN's.
+  If there are multiple maximal elements, then the first one will be returned.
+
+If `itr` is a `NamedTuple` or dictionary-like `AbstractDict` L, the returned index is a key `k`,
+such that `f(L[k])` is maximal.
+
+
+##### Examples:
+```julia
+julia> NaNMath.argmax([7, 1, 1, NaN])
+1
+
+julia> NaNMath.argmax([1.0 2; 3 NaN])
+CartesianIndex(2, 1)
+
+julia> NaNMath.argmax(Dict("x" => 1.0, "y" => -1.2, "z" => NaN))
+"x"
+```
+"""
+function argmax end
+argmax(x) = findmax(identity,x)[2]
+argmax(f,x) = getindex(x,findmax(f,x)[2])
+
 end
