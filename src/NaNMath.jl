@@ -14,7 +14,7 @@ end
 
 # Would be more efficient to remove the domain check in Base.sqrt(),
 # but this doesn't seem easy to do.
-sqrt(x::Real) = x < 0.0 ? NaN : Base.sqrt(x)
+sqrt(x::T) where {T<:Real} = x < 0.0 ? T(NaN) : Base.sqrt(x)
 
 # Don't override built-in ^ operator
 pow(x::Float64, y::Float64) = ccall((:pow,libm),  Float64, (Float64,Float64), x, y)
