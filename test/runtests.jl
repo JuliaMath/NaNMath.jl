@@ -18,6 +18,15 @@ using Test
 @test NaNMath.pow(-1.5,2.3) isa Float64
 @test isnan(NaNMath.sqrt(-5))
 @test NaNMath.sqrt(5) == Base.sqrt(5)
+@test isnan(NaNMath.sqrt(-3.2f0)) && NaNMath.sqrt(-3.2f0) isa Float32
+@test isnan(NaNMath.sqrt(-BigFloat(7.0))) && NaNMath.sqrt(-BigFloat(7.0)) isa BigFloat 
+@test isnan(NaNMath.sqrt(-7)) && NaNMath.sqrt(-7) isa Float64 
+@inferred NaNMath.sqrt(5)
+@inferred NaNMath.sqrt(5.0)
+@inferred NaNMath.sqrt(5.0f0)
+@inferred NaNMath.sqrt(-5)
+@inferred NaNMath.sqrt(-5.0)
+@inferred NaNMath.sqrt(-5.0f0)
 @test NaNMath.sum([1., 2., NaN]) == 3.0
 @test NaNMath.sum([1. 2.; NaN 1.]) == 4.0
 @test isnan(NaNMath.sum([NaN, NaN]))
