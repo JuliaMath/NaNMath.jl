@@ -9,7 +9,18 @@ for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
         ($f)(x::Float64) = ccall(($(string(f)),libm), Float64, (Float64,), x)
         ($f)(x::Float32) = ccall(($(string(f,"f")),libm), Float32, (Float32,), x)
         ($f)(x::Real) = ($f)(float(x))
+        if $f !== :lgamma
+            ($f)(x) = (Base.$f)(x)
+        end
     end
+end
+
+for f in (:sqrt,)
+    @eval ($f)(x) = (Base.$f)(x)
+end
+
+for f in (:max, :min)
+    @eval ($f)(x, y) = (Base.$f)(x, y)
 end
 
 # Would be more efficient to remove the domain check in Base.sqrt(),
@@ -22,8 +33,9 @@ pow(x::Float64, y::Float64) = ccall((:pow,libm),  Float64, (Float64,Float64), x,
 pow(x::Float32, y::Float32) = ccall((:powf,libm), Float32, (Float32,Float32), x, y)
 # We `promote` first before converting to floating pointing numbers to ensure that
 # e.g. `pow(::Float32, ::Int)` ends up calling `pow(::Float32, ::Float32)`
-pow(x::Number, y::Number) = pow(promote(x, y)...)
-pow(x::T, y::T) where {T<:Number} = pow(float(x), float(y))
+pow(x::Real, y::Real) = pow(promote(x, y)...)
+pow(x::T, y::T) where {T<:Real} = pow(float(x), float(y))
+pow(x, y) = ^(x, y)
 
 """
 NaNMath.sum(A)
