@@ -32,6 +32,8 @@ jobs:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
       - uses: julia-actions/cache@v2
+        with:  # https://github.com/julia-actions/cache/issues/112
+          cache-registries: ${{ !(matrix.version == '1.6' && matrix.os == 'windows-latest') }}
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
