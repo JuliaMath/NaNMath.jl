@@ -1,25 +1,26 @@
 module NaNMath
 
-using OpenLibm_jll
+using OpenLibm_jll, Compat
 const libm = OpenLibm_jll.libopenlibm
 
 for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
           :lgamma, :log1p)
     @eval begin
-        ($f)(x::Float64) = ccall(($(string(f)),libm), Float64, (Float64,), x)
-        ($f)(x::Float32) = ccall(($(string(f,"f")),libm), Float32, (Float32,), x)
+        Compat.@assume_effects :total ($f)(x::Float64) = ccall(($(string(f)),libm), Float64, (Float64,), x)
+        Compat.@assume_effects :total ($f)(x::Float32) = ccall(($(string(f,"f")),libm), Float32, (Float32,), x)
         ($f)(x::Real) = ($f)(float(x))
     end
 end
 
 # Would be more efficient to remove the domain check in Base.sqrt(),
 # but this doesn't seem easy to do.
+Compat.@assume_effects :nothrow sqrt(x::T) where {T<:Union{Float16, Float32, Float64}} = x < 0.0 ? T(NaN) : Base.sqrt(x)
 sqrt(x::T) where {T<:AbstractFloat} = x < 0.0 ? T(NaN) : Base.sqrt(x)
 sqrt(x::Real) = sqrt(float(x))
 
 # Don't override built-in ^ operator
-pow(x::Float64, y::Float64) = ccall((:pow,libm),  Float64, (Float64,Float64), x, y)
-pow(x::Float32, y::Float32) = ccall((:powf,libm), Float32, (Float32,Float32), x, y)
+Compat.@assume_effects :total pow(x::Float64, y::Float64) = ccall((:pow,libm),  Float64, (Float64,Float64), x, y)
+Compat.@assume_effects :total pow(x::Float32, y::Float32) = ccall((:powf,libm), Float32, (Float32,Float32), x, y)
 # We `promote` first before converting to floating pointing numbers to ensure that
 # e.g. `pow(::Float32, ::Int)` ends up calling `pow(::Float32, ::Float32)`
 pow(x::Number, y::Number) = pow(promote(x, y)...)
