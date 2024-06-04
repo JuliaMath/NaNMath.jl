@@ -1,6 +1,8 @@
 # NaNMath
 
-[![deps](https://juliahub.com/docs/NaNMath/deps.svg)](https://juliahub.com/ui/Packages/NaNMath/k9Y1O?t=2)
+[![CI](https://github.com/JuliaMath/NaNMath.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaMath/NaNMath.jl/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/JuliaMath/NaNMath.jl/graph/badge.svg?token=uoFvfoAd4T)](https://codecov.io/gh/JuliaMath/NaNMath.jl)
+[![deps](https://juliahub.com/docs/General/NaNMath/stable/deps.svg)](https://juliahub.com/ui/Packages/General/NaNMath?t=2)
 
 Implementations of basic math functions which return ``NaN`` instead of throwing a ``DomainError``.
 
