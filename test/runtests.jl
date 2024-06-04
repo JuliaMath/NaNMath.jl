@@ -79,3 +79,18 @@ using Test
 @test isnan(NaNMath.max(NaN, NaN))
 @test isnan(NaNMath.max(NaN))
 @test NaNMath.max(NaN, NaN, 0.0, 1.0) == 1.0
+
+# Test forwarding
+x = 1 + 2im
+for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
+          :log1p, :sqrt)
+    @test @eval (NaNMath.$f)(x) == $f(x)
+end
+
+struct A end
+Base.isless(::A, ::A) = false
+y = A()
+for f in (:max, :min)
+    @test @eval (NaNMath.$f)(y, y) == $f(y, y)
+end
+@test NaNMath.pow(x, x) == ^(x, x)
