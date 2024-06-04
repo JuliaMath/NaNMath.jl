@@ -3,27 +3,67 @@ module NaNMath
 using OpenLibm_jll
 const libm = OpenLibm_jll.libopenlibm
 
+
 for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
           :lgamma, :log1p)
     @eval begin
         ($f)(x::Float64) = ccall(($(string(f)),libm), Float64, (Float64,), x)
         ($f)(x::Float32) = ccall(($(string(f,"f")),libm), Float32, (Float32,), x)
-        ($f)(x::Real) = ($f)(float(x))
+        ($f)(x::Float16) = Float16(($f)(Float32(x)))
+        function ($f)(x::Real)
+            xf = float(x)
+            x === xf && throw(MethodError($f, (x,)))
+            return ($f)(xf)
+        end
     end
 end
+sin(x::T) where {T<:AbstractFloat} = isfinite(x) ? Base.sin(x) : T(NaN)
+cos(x::T) where {T<:AbstractFloat} = isfinite(x) ? Base.cos(x) : T(NaN)
+tan(x::T) where {T<:AbstractFloat} = isfinite(x) ? Base.tan(x) : T(NaN)
+asin(x::T) where {T<:AbstractFloat} = abs(x) > 1 ? T(NaN) : Base.asin(x)
+acos(x::T) where {T<:AbstractFloat} = abs(x) > 1 ? T(NaN) : Base.acos(x)
+acosh(x::T) where {T<:AbstractFloat} = x < 1 ? T(NaN) : Base.acosh(x)
+atanh(x::T) where {T<:AbstractFloat} = abs(x) > 1 ? T(NaN) : Base.atanh(x)
+log(x::T) where {T<:AbstractFloat} = x < 0 ? T(NaN) : Base.log(x)
+log2(x::T) where {T<:AbstractFloat} = x < 0 ? T(NaN) : Base.log2(x)
+log10(x::T) where {T<:AbstractFloat} = x < 0 ? T(NaN) : Base.log10(x)
+# lgamma does not have a Base version; the MethodError above will suffice
+log1p(x::T) where {T<:AbstractFloat} = x < -1 ? T(NaN) : Base.log1p(x)
+
 
 # Would be more efficient to remove the domain check in Base.sqrt(),
 # but this doesn't seem easy to do.
 sqrt(x::T) where {T<:AbstractFloat} = x < 0.0 ? T(NaN) : Base.sqrt(x)
-sqrt(x::Real) = sqrt(float(x))
+function sqrt(x::Real)
+    xf = float(x)
+    x === xf && throw(MethodError(sqrt, (x,)))
+    return sqrt(xf)
+end
 
 # Don't override built-in ^ operator
 pow(x::Float64, y::Float64) = ccall((:pow,libm),  Float64, (Float64,Float64), x, y)
 pow(x::Float32, y::Float32) = ccall((:powf,libm), Float32, (Float32,Float32), x, y)
+pow(x::Float16, y::Float16) = Float16(pow(Float32(x), Float32(y)))
 # We `promote` first before converting to floating pointing numbers to ensure that
 # e.g. `pow(::Float32, ::Int)` ends up calling `pow(::Float32, ::Float32)`
 pow(x::Number, y::Number) = pow(promote(x, y)...)
-pow(x::T, y::T) where {T<:Number} = pow(float(x), float(y))
+function pow(x::T, y::T) where {T<:Number}
+    xf = float(x)
+    yf = float(y)
+    x === xf && y === yf && throw(MethodError(pow, (x,y)))
+    return pow(xf, yf)
+end
+function pow(x::T, y::T) where {T<:AbstractFloat}
+    try
+        return x^y
+    catch e
+        if isa(e, DomainError)
+            return T(NaN)
+        else
+            rethrow(e)
+        end
+    end
+end
 
 """
 NaNMath.sum(A)

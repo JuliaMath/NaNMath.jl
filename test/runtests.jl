@@ -1,12 +1,56 @@
 using NaNMath
 using Test
+using DoubleFloats
+
+
+# https://github.com/JuliaMath/NaNMath.jl/issues/76
+@test_throws MethodError NaNMath.pow(1.0, 1.0+im)
+
+
+for T in (Float64, Float32, Float16, BigFloat)
+    for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
+              :log1p)  # Note: do :lgamma separately because it can't handle BigFloat
+        @eval begin
+            @test NaNMath.$f($T(2//3)) isa $T
+            @test NaNMath.$f($T(3//2)) isa $T
+            @test NaNMath.$f($T(-2//3)) isa $T
+            @test NaNMath.$f($T(-3//2)) isa $T
+            @test NaNMath.$f($T(Inf)) isa $T
+            @test NaNMath.$f($T(-Inf)) isa $T
+        end
+    end
+end
+for T in (Float64, Float32, Float16)
+    @test NaNMath.lgamma(T(2//3)) isa T
+    @test NaNMath.lgamma(T(3//2)) isa T
+    @test NaNMath.lgamma(T(-2//3)) isa T
+    @test NaNMath.lgamma(T(-3//2)) isa T
+    @test NaNMath.lgamma(T(Inf)) isa T
+    @test NaNMath.lgamma(T(-Inf)) isa T
+end
+@test_throws MethodError NaNMath.lgamma(BigFloat(2//3))
 
 @test isnan(NaNMath.log(-10))
+@test isnan(NaNMath.log(-10f0))
+@test isnan(NaNMath.log(Float16(-10)))
 @test isnan(NaNMath.log1p(-100))
+@test isnan(NaNMath.log1p(-100f0))
+@test isnan(NaNMath.log1p(Float16(-100)))
 @test isnan(NaNMath.pow(-1.5,2.3))
 @test isnan(NaNMath.pow(-1.5f0,2.3f0))
 @test isnan(NaNMath.pow(-1.5,2.3f0))
 @test isnan(NaNMath.pow(-1.5f0,2.3))
+@test isnan(NaNMath.pow(Float16(-1.5),Float16(2.3)))
+@test isnan(NaNMath.pow(Float16(-1.5),2.3))
+@test isnan(NaNMath.pow(-1.5,Float16(2.3)))
+@test isnan(NaNMath.pow(Float16(-1.5),2.3f0))
+@test isnan(NaNMath.pow(-1.5f0,Float16(2.3)))
+@test isnan(NaNMath.pow(-1.5f0,BigFloat(2.3)))
+@test isnan(NaNMath.pow(BigFloat(-1.5),BigFloat(2.3)))
+@test isnan(NaNMath.pow(BigFloat(-1.5),2.3f0))
+@test isnan(NaNMath.pow(-1.5f0,Double64(2.3)))
+@test isnan(NaNMath.pow(Double64(-1.5),Double64(2.3)))
+@test isnan(NaNMath.pow(Double64(-1.5),2.3f0))
 @test NaNMath.pow(-1,2) isa Float64
 @test NaNMath.pow(-1.5f0,2) isa Float32
 @test NaNMath.pow(-1.5f0,2//1) isa Float32
@@ -16,11 +60,28 @@ using Test
 @test NaNMath.pow(-1.5,2//1) isa Float64
 @test NaNMath.pow(-1.5,2.3f0) isa Float64
 @test NaNMath.pow(-1.5,2.3) isa Float64
-@test isnan(NaNMath.sqrt(-5))
+@test NaNMath.pow(Float16(-1.5),2.3) isa Float64
+@test NaNMath.pow(Float16(-1.5),Float16(2.3)) isa Float16
+@test NaNMath.pow(-1.5,Float16(2.3)) isa Float64
+@test NaNMath.pow(Float16(-1.5),2.3f0) isa Float32
+@test NaNMath.pow(-1.5f0,Float16(2.3)) isa Float32
+@test NaNMath.pow(-1.5f0,BigFloat(2.3)) isa BigFloat
+@test NaNMath.pow(BigFloat(-1.5),BigFloat(2.3)) isa BigFloat
+@test NaNMath.pow(BigFloat(-1.5),2.3f0) isa BigFloat
+@test NaNMath.pow(-1.5f0,Double64(2.3)) isa Double64
+@test NaNMath.pow(Double64(-1.5),Double64(2.3)) isa Double64
+@test NaNMath.pow(Double64(-1.5),2.3f0) isa Double64
+@test NaNMath.sqrt(-5) isa Float64
 @test NaNMath.sqrt(5) == Base.sqrt(5)
+@test NaNMath.sqrt(-5f0) isa Float32
+@test NaNMath.sqrt(5f0) == Base.sqrt(5f0)
+@test NaNMath.sqrt(Float16(-5)) isa Float16
+@test NaNMath.sqrt(Float16(5)) == Base.sqrt(Float16(5))
+@test NaNMath.sqrt(BigFloat(-5)) isa BigFloat
+@test NaNMath.sqrt(BigFloat(5)) == Base.sqrt(BigFloat(5))
 @test isnan(NaNMath.sqrt(-3.2f0)) && NaNMath.sqrt(-3.2f0) isa Float32
-@test isnan(NaNMath.sqrt(-BigFloat(7.0))) && NaNMath.sqrt(-BigFloat(7.0)) isa BigFloat 
-@test isnan(NaNMath.sqrt(-7)) && NaNMath.sqrt(-7) isa Float64 
+@test isnan(NaNMath.sqrt(-BigFloat(7.0))) && NaNMath.sqrt(-BigFloat(7.0)) isa BigFloat
+@test isnan(NaNMath.sqrt(-7)) && NaNMath.sqrt(-7) isa Float64
 @inferred NaNMath.sqrt(5)
 @inferred NaNMath.sqrt(5.0)
 @inferred NaNMath.sqrt(5.0f0)
