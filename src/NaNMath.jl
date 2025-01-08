@@ -25,6 +25,10 @@ pow(x::Float32, y::Float32) = ccall((:powf,libm), Float32, (Float32,Float32), x,
 pow(x::Number, y::Number) = pow(promote(x, y)...)
 pow(x::T, y::T) where {T<:Number} = pow(float(x), float(y))
 
+# The following combinations are safe, so we can fall back to ^
+pow(x::Number, y::Integer) = x^y
+pow(x::Complex, y::Complex) = x^y
+
 """
 NaNMath.sum(A)
 
