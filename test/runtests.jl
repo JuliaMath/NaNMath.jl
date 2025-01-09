@@ -7,7 +7,6 @@ using Test
 @test isnan(NaNMath.pow(-1.5f0,2.3f0))
 @test isnan(NaNMath.pow(-1.5,2.3f0))
 @test isnan(NaNMath.pow(-1.5f0,2.3))
-@test NaNMath.pow(-1,2) isa Float64
 @test NaNMath.pow(-1.5f0,2) isa Float32
 @test NaNMath.pow(-1.5f0,2//1) isa Float32
 @test NaNMath.pow(-1.5f0,2.3f0) isa Float32
@@ -16,6 +15,11 @@ using Test
 @test NaNMath.pow(-1.5,2//1) isa Float64
 @test NaNMath.pow(-1.5,2.3f0) isa Float64
 @test NaNMath.pow(-1.5,2.3) isa Float64
+@test NaNMath.pow(-1,2) === 1
+@test NaNMath.pow(2,2) === 4
+@test NaNMath.pow(1.0, 1.0+im) === 1.0 + 0.0im
+@test NaNMath.pow(1.0+im, 1) === 1.0 + 1.0im
+@test NaNMath.pow(1.0+im, 1.0) === 1.0 + 1.0im
 @test isnan(NaNMath.sqrt(-5))
 @test NaNMath.sqrt(5) == Base.sqrt(5)
 @test isnan(NaNMath.sqrt(-3.2f0)) && NaNMath.sqrt(-3.2f0) isa Float32
