@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ['1.6', '1', 'nightly']  # Test against LTS, current minor release, and nightly
+        version: ['1.10', '1', 'pre']  # Test against LTS, current minor release, and pre-releases
         os:
           - ubuntu-latest
           - macOS-latest
