@@ -7,7 +7,6 @@ using Test
 @test isnan(NaNMath.pow(-1.5f0,2.3f0))
 @test isnan(NaNMath.pow(-1.5,2.3f0))
 @test isnan(NaNMath.pow(-1.5f0,2.3))
-@test NaNMath.pow(-1,2) isa Float64
 @test NaNMath.pow(-1.5f0,2) isa Float32
 @test NaNMath.pow(-1.5f0,2//1) isa Float32
 @test NaNMath.pow(-1.5f0,2.3f0) isa Float32
@@ -16,8 +15,22 @@ using Test
 @test NaNMath.pow(-1.5,2//1) isa Float64
 @test NaNMath.pow(-1.5,2.3f0) isa Float64
 @test NaNMath.pow(-1.5,2.3) isa Float64
+@test NaNMath.pow(-1,2) === 1
+@test NaNMath.pow(2,2) === 4
+@test NaNMath.pow(1.0, 1.0+im) === 1.0 + 0.0im
+@test NaNMath.pow(1.0+im, 1) === 1.0 + 1.0im
+@test NaNMath.pow(1.0+im, 1.0) === 1.0 + 1.0im
 @test isnan(NaNMath.sqrt(-5))
 @test NaNMath.sqrt(5) == Base.sqrt(5)
+@test isnan(NaNMath.sqrt(-3.2f0)) && NaNMath.sqrt(-3.2f0) isa Float32
+@test isnan(NaNMath.sqrt(-BigFloat(7.0))) && NaNMath.sqrt(-BigFloat(7.0)) isa BigFloat 
+@test isnan(NaNMath.sqrt(-7)) && NaNMath.sqrt(-7) isa Float64 
+@inferred NaNMath.sqrt(5)
+@inferred NaNMath.sqrt(5.0)
+@inferred NaNMath.sqrt(5.0f0)
+@inferred NaNMath.sqrt(-5)
+@inferred NaNMath.sqrt(-5.0)
+@inferred NaNMath.sqrt(-5.0f0)
 @test NaNMath.sum([1., 2., NaN]) == 3.0
 @test NaNMath.sum([1. 2.; NaN 1.]) == 4.0
 @test isnan(NaNMath.sum([NaN, NaN]))
@@ -203,3 +216,18 @@ end
     @test NaNMath.argmin(exp,x) === -1.0
     @test NaNMath.argmax(exp,x) === 3.0
 end
+
+# Test forwarding
+x = 1 + 2im
+for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
+          :log1p, :sqrt)
+    @test @eval (NaNMath.$f)(x) == $f(x)
+end
+
+struct A end
+Base.isless(::A, ::A) = false
+y = A()
+for f in (:max, :min)
+    @test @eval (NaNMath.$f)(y, y) == $f(y, y)
+end
+@test NaNMath.pow(x, x) == ^(x, x)
