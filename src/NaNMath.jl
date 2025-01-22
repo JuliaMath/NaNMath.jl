@@ -11,6 +11,9 @@ for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh,
             x === xf && throw(MethodError($f, (x,)))
             ($f)(xf)
         end
+        if $f !== :lgamma
+            ($f)(x) = (Base.$f)(x)
+        end
     end
 end
 
