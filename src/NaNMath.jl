@@ -39,6 +39,7 @@ pow(x, y) = ^(x, y)
 
 # The following combinations are safe, so we can fall back to ^
 pow(x::Number, y::Integer) = x^y
+pow(x::Real, y::Integer) = x^y
 pow(x::Complex, y::Complex) = x^y
 
 """
