@@ -7,9 +7,9 @@ for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh,
           :log, :log2, :log10, :log1p, :lgamma)
     @eval begin
         function ($f)(x::Real)
-            fx = float(x)
+            xf = float(x)
             x === xf && throw(MethodError($f, (x,)))
-            ($f)(fx)
+            ($f)(xf)
         end
     end
 end
