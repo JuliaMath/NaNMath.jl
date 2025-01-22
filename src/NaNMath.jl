@@ -14,10 +14,8 @@ for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh,
     end
 end
 
-@eval begin
-    Base.@assume_effects :total lgamma(x::Float64) = ccall(("lgamma",libm), Float64, (Float64,), x)
-    Base.@assume_effects :total lgamma(x::Float32) = ccall(("lgammaf",libm), Float32, (Float32,), x)
-end
+Base.@assume_effects :total lgamma(x::Float64) = ccall(("lgamma",libm), Float64, (Float64,), x)
+Base.@assume_effects :total lgamma(x::Float32) = ccall(("lgammaf",libm), Float32, (Float32,), x)
 
 for f in (:sin, :cos, :tan)
     @eval begin
