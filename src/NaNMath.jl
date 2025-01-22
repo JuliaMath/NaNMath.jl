@@ -372,10 +372,10 @@ end
 
 # The functions `findmin`, `findmax`, `argmin`, and `argmax` are supported 
 # to work correctly for the following iterable types:
-_valtype(x::AbstractArray{T}) where T<:AbstractFloat = eltype(x)
-_valtype(x::Tuple{Vararg{T} where T<:AbstractFloat})  = eltype(x)
-_valtype(x::NamedTuple{syms, <:Tuple{Vararg{T} where T<:AbstractFloat}}) where {syms} = eltype(x)
-_valtype(x::AbstractDict{K,T}) where {K,T<:AbstractFloat} = valtype(x)
+_valtype(x::AbstractArray{<:AbstractFloat}) = eltype(x)
+_valtype(x::Tuple{Vararg{AbstractFloat}}) = eltype(x)
+_valtype(x::NamedTuple{<:Any, <:Tuple{Vararg{AbstractFloat}}}) = eltype(x)
+_valtype(x::AbstractDict{<:Any,<:AbstractFloat}) = valtype(x)
 _valtype(x) = error(
     "Iterables with value type AbstractFloat or its subtypes are supported.
     The provided input type $(typeof(x)) is not.
