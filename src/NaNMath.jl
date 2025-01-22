@@ -11,9 +11,6 @@ for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh,
             x === xf && throw(MethodError($f, (x,)))
             ($f)(xf)
         end
-        if $f !== :lgamma
-            ($f)(x) = (Base.$f)(x)
-        end
     end
 end
 
@@ -51,14 +48,6 @@ function log1p(x::T) where T<:Union{Float16, Float32, Float64}
     x < T(-1) ? T(NaN) : Base.log1p(x)
 end
 
-for f in (:sqrt,)
-    @eval ($f)(x) = (Base.$f)(x)
-end
-
-for f in (:max, :min)
-    @eval ($f)(x, y) = (Base.$f)(x, y)
-end
-
 sqrt(x::T) where {T<:Union{Float16, Float32, Float64}} = x < T(0) ? T(NaN) : Base.Intrinsics.sqrt_llvm(x)
 sqrt(x::T) where {T<:AbstractFloat} = x < T(0) ? T(NaN) : Base.sqrt(x)
 sqrt(x::Real) = sqrt(float(x))
@@ -68,13 +57,11 @@ Base.@assume_effects :total pow(x::Float64, y::Float64) = ccall((:pow,libm),  Fl
 Base.@assume_effects :total pow(x::Float32, y::Float32) = ccall((:powf,libm), Float32, (Float32,Float32), x, y)
 # We `promote` first before converting to floating pointing numbers to ensure that
 # e.g. `pow(::Float32, ::Int)` ends up calling `pow(::Float32, ::Float32)`
-pow(x::Real, y::Real) = pow(promote(x, y)...)
-pow(x::T, y::T) where {T<:Real} = pow(float(x), float(y))
-pow(x, y) = ^(x, y)
+pow(x::Number, y::Number) = pow(promote(x, y)...)
+pow(x::T, y::T) where {T<:Number} = pow(float(x), float(y))
 
 # The following combinations are safe, so we can fall back to ^
 pow(x::Number, y::Integer) = x^y
-pow(x::Real, y::Integer) = x^y
 pow(x::Complex, y::Complex) = x^y
 
 """
