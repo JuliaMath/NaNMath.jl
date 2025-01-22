@@ -14,11 +14,9 @@ for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh,
     end
 end
 
-for f in (:lgamma)
-    @eval begin
-        Base.@assume_effects :total ($f)(x::Float64) = ccall(($(string(f)),libm), Float64, (Float64,), x)
-        Base.@assume_effects :total ($f)(x::Float32) = ccall(($(string(f,"f")),libm), Float32, (Float32,), x)
-    end
+@eval begin
+    Base.@assume_effects :total lgamma(x::Float64) = ccall(("lgamma",libm), Float64, (Float64,), x)
+    Base.@assume_effects :total lgamma(x::Float32) = ccall(("lgammaf",libm), Float32, (Float32,), x)
 end
 
 for f in (:sin, :cos, :tan)
