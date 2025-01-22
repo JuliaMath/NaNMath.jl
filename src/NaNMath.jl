@@ -3,19 +3,53 @@ module NaNMath
 using OpenLibm_jll
 const libm = OpenLibm_jll.libopenlibm
 
-for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
-          :lgamma, :log1p)
+for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh,
+          :log, :log2, :log10, :log1p, :lgamma)
     @eval begin
-        Base.@assume_effects :total ($f)(x::Float64) = ccall(($(string(f)),libm), Float64, (Float64,), x)
-        Base.@assume_effects :total ($f)(x::Float32) = ccall(($(string(f,"f")),libm), Float32, (Float32,), x)
-        ($f)(x::Real) = ($f)(float(x))
+        function ($f)(x::Real)
+            xf = float(x)
+            x === xf && throw(MethodError($f, (x,)))
+            ($f)(xf)
+        end
     end
 end
 
-# Would be more efficient to remove the domain check in Base.sqrt(),
-# but this doesn't seem easy to do.
-Base.@assume_effects :nothrow sqrt(x::T) where {T<:Union{Float16, Float32, Float64}} = x < 0.0 ? T(NaN) : Base.sqrt(x)
-sqrt(x::T) where {T<:AbstractFloat} = x < 0.0 ? T(NaN) : Base.sqrt(x)
+Base.@assume_effects :total lgamma(x::Float64) = ccall(("lgamma",libm), Float64, (Float64,), x)
+Base.@assume_effects :total lgamma(x::Float32) = ccall(("lgammaf",libm), Float32, (Float32,), x)
+
+for f in (:sin, :cos, :tan)
+    @eval begin
+        function ($f)(x::T) where T<:Union{Float16, Float32, Float64}
+            isinf(x) ? T(NaN) : (Base.$f)(x)
+        end
+    end
+end
+
+for f in (:asin, :acos, :atanh)
+    @eval begin
+        function ($f)(x::T) where T<:Union{Float16, Float32, Float64}
+            abs(x) > T(1) ? T(NaN) : (Base.$f)(x)
+        end
+    end
+end
+function acosh(x::T) where T<:Union{Float16, Float32, Float64}
+    x < T(1) ? T(NaN) : acosh(x)
+end
+
+for f in (:log, :log2, :log10)
+    @eval begin
+        function ($f)(x::T) where T<:Union{Float16, Float32, Float64}
+            x < 0 ? T(NaN) : (Base.$f)(x)
+        end
+    end
+end
+
+function log1p(x::T) where T<:Union{Float16, Float32, Float64}
+    x < T(-1) ? T(NaN) : Base.log1p(x)
+end
+
+sqrt(x::T) where {T<:Union{Float16, Float32, Float64}} = x < T(0) ? T(NaN) : Base.Intrinsics.sqrt_llvm(x)
+sqrt(x::T) where {T<:AbstractFloat} = x < T(0) ? T(NaN) : Base.sqrt(x)
 sqrt(x::Real) = sqrt(float(x))
 
 # Don't override built-in ^ operator
@@ -359,10 +393,10 @@ end
 
 # The functions `findmin`, `findmax`, `argmin`, and `argmax` are supported 
 # to work correctly for the following iterable types:
-_valtype(x::AbstractArray{T}) where T<:AbstractFloat = eltype(x)
-_valtype(x::Tuple{Vararg{T} where T<:AbstractFloat})  = eltype(x)
-_valtype(x::NamedTuple{syms, <:Tuple{Vararg{T} where T<:AbstractFloat}}) where {syms} = eltype(x)
-_valtype(x::AbstractDict{K,T}) where {K,T<:AbstractFloat} = valtype(x)
+_valtype(x::AbstractArray{<:AbstractFloat}) = eltype(x)
+_valtype(x::Tuple{Vararg{AbstractFloat}}) = eltype(x)
+_valtype(x::NamedTuple{<:Any, <:Tuple{Vararg{AbstractFloat}}}) = eltype(x)
+_valtype(x::AbstractDict{<:Any,<:AbstractFloat}) = valtype(x)
 _valtype(x) = error(
     "Iterables with value type AbstractFloat or its subtypes are supported.
     The provided input type $(typeof(x)) is not.
