@@ -14,6 +14,10 @@ for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
             xf = float(x)
             x === xf && throw(MethodError($f, (x,)))
             return ($f)(xf)
+         end
+         if $f !== :lgamma
+            ($f)(x) = (Base.$f)(x)
+         end
         end
     end
 end
