@@ -46,9 +46,9 @@ pow(x::Float16, y::Float16) = Float16(pow(Float32(x), Float32(y)))
 # We `promote` first before converting to floating pointing numbers to ensure that
 # e.g. `pow(::Float32, ::Int)` ends up calling `pow(::Float32, ::Float32)`
 pow(x::Number, y::Number) = pow(promote(x, y)...)
+function pow(x::T, y::T) where {T<:Number}
     yf = float(y)
     xf = float(x)
-function pow(x::T, y::T) where {T<:Number}
     x === xf && y === yf && throw(MethodError(pow, (x,y)))
     return pow(xf, yf)
 end
