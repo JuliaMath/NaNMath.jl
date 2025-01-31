@@ -223,6 +223,7 @@ for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
           :log1p, :sqrt)
     @test @eval (NaNMath.$f)(x) == $f(x)
 end
+@test_throws MethodError NaNMath.lgamma(x)
 
 struct A end
 Base.isless(::A, ::A) = false
