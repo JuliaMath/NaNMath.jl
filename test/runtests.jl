@@ -232,3 +232,15 @@ for f in (:max, :min)
     @test @eval (NaNMath.$f)(y, y) == $f(y, y)
 end
 @test NaNMath.pow(x, x) == ^(x, x)
+
+@testset "acosh" begin
+    for T in (Float16, Float32, Float64)
+        y = @inferred(NaNMath.acosh(T(0.5)))
+        @test y isa T
+        @test isnan(y)
+        y = NaNMath.acosh(T(2.1))
+        @test y isa T
+        @test !isnan(y)
+        @test y === acosh(T(2.1))
+    end
+end
