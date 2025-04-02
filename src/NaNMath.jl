@@ -34,7 +34,7 @@ for f in (:asin, :acos, :atanh)
     end
 end
 function acosh(x::T) where T<:Union{Float16, Float32, Float64}
-    x < T(1) ? T(NaN) : acosh(x)
+    x < T(1) ? T(NaN) : Base.acosh(x)
 end
 
 for f in (:log, :log2, :log10)
