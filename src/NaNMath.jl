@@ -68,6 +68,12 @@ Base.@assume_effects :total pow(x::Float32, y::Float32) = ccall((:powf,libm), Fl
 # e.g. `pow(::Float32, ::Int)` ends up calling `pow(::Float32, ::Float32)`
 pow(x::Real, y::Real) = pow(promote(x, y)...)
 pow(x::T, y::T) where {T<:Real} = pow(float(x), float(y))
+function pow(x::T, y::T) where {T<:AbstractFloat}
+    if x < 0 && !isinteger(y)
+        return T(NaN)
+    end
+    return x ^ y
+end
 pow(x, y) = ^(x, y)
 
 # The following combinations are safe, so we can fall back to ^
