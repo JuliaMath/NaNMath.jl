@@ -3,8 +3,10 @@ using Test
 
 @test isnan(NaNMath.log(-10))
 @test isnan(NaNMath.log1p(-100))
-@test isnan(NaNMath.pow(-1.5,2.3))
-@test isnan(NaNMath.pow(-1.5f0,2.3f0))
+for T in (Float16, Float32, Float64, BigFloat)
+    @test isnan(NaNMath.pow(T(-1.5),T(2.3)))
+    @test NaNMath.pow(T(-1.5),T(5)) ≈ T(-1.5) ^ T(5)
+end
 @test isnan(NaNMath.pow(-1.5,2.3f0))
 @test isnan(NaNMath.pow(-1.5f0,2.3))
 @test NaNMath.pow(-1.5f0,2) isa Float32
