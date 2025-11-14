@@ -30,8 +30,9 @@ max
 ```
 
 Example:
+
 ```julia
-using NaNMath; nm=NaNMath
-nm.sum([1., 2., NaN]) # result: 3.0
+using NaNMath
+NaNMath.sum([1., 2., NaN]) # result: 3.0
 ```
 
