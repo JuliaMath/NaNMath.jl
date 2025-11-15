@@ -283,7 +283,7 @@ function mean_count(x::AbstractArray{T}) where T<:AbstractFloat
 end
 
 """
-`NaNMath.var(A)`
+    NaNMath.var(A)
 
 ##### Args:
 * `A`: An array of floating point numbers
@@ -319,7 +319,7 @@ function var(x::AbstractArray{T}) where T<:AbstractFloat
 end
 
 """
-`NaNMath.std(A)`
+    NaNMath.std(A)
 
 ##### Args:
 * `A`: An array of floating point numbers
