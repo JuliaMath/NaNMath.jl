@@ -283,17 +283,19 @@ function mean_count(x::AbstractArray{T}) where T<:AbstractFloat
 end
 
 """
-NaNMath.var(A)
+    NaNMath.var(A)
 
 ##### Args:
-* `A`: A one dimensional array of floating point numbers
+* `A`: An array of floating point numbers
 
 ##### Returns:
-* Returns the sample variance of a vector A. The algorithm will return
-  an estimator of the  generative distribution's variance under the
-  assumption that each entry of v is an IID drawn from that generative
-  distribution. This computation is  equivalent to calculating \\
-  sum((v - mean(v)).^2) / (length(v) - 1). NaN values are ignored.
+* Returns the sample variance of all elements in the array, ignoring
+  NaN's. The algorithm returns an estimator of the generative
+  distribution's variance under the assumption that each non-NaN entry
+  of `A` is an IID drawn from that generative distribution. This
+  computation is equivalent to calculating \\
+  `sum((A - mean(A)).^2) / (length(A) - 1)` \\
+  while skipping NaN values.
 
 ##### Examples:
 ```julia
@@ -301,7 +303,7 @@ using NaNMath
 NaNMath.var([1., 2., NaN]) # result: 0.5
 ```
 """
-function var(x::Vector{T}) where T<:AbstractFloat
+function var(x::AbstractArray{T}) where T<:AbstractFloat
     mean_val, n = mean_count(x)
     if !isnan(mean_val)
         sum_square = zero(eltype(x))
@@ -317,17 +319,19 @@ function var(x::Vector{T}) where T<:AbstractFloat
 end
 
 """
-NaNMath.std(A)
+    NaNMath.std(A)
 
 ##### Args:
-* `A`: A one dimensional array of floating point numbers
+* `A`: An array of floating point numbers
 
 ##### Returns:
-* Returns the standard deviation of a vector A. The algorithm will return
-  an estimator of the  generative distribution's standard deviation under the
-  assumption that each entry of v is an IID drawn from that generative
-  distribution. This computation is  equivalent to calculating \\
-  sqrt(sum((v - mean(v)).^2) / (length(v) - 1)). NaN values are ignored.
+* Returns the standard deviation of all elements in the array,
+  ignoring NaN's. The algorithm returns an estimator of the
+  generative distribution's standard deviation under the assumption
+  that each non-NaN entry of v is an IID drawn from that generative
+  distribution. This computation is equivalent to calculating \\
+  `sqrt(sum((A - mean(A)).^2) / (length(A) - 1))` \\
+  while skipping NaN values.
 
 ##### Examples:
 ```julia
@@ -335,7 +339,7 @@ using NaNMath
 NaNMath.std([1., 2., NaN]) # result: 0.7071067811865476
 ```
 """
-function std(x::Vector{T}) where T<:AbstractFloat
+function std(x::AbstractArray{T}) where T<:AbstractFloat
     return sqrt(var(x))
 end
 
