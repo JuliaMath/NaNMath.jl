@@ -1,7 +1,6 @@
 using NaNMath
 using ChainRulesCore
 using ChainRulesTestUtils
-using FiniteDifferences: forward_fdm
 using Test
 
 @test isnan(NaNMath.log(-10))
@@ -251,22 +250,52 @@ end
 end
 
 @testset "ChainRules" begin
-    # Forward differences never evaluate `NaNMath.sqrt` below `x` (in `test_frule` only for a
-    # positive tangent), so they can't step below 0, where `NaNMath.sqrt` returns NaN.
-    # Finite differencing in Float16 is erratic (errors of up to 20% for some inputs > 1),
-    # so Float16 is only tested at inputs where it is reliable.
-    fdm = forward_fdm(5, 1)
-    @testset "sqrt($(repr(x)))" for (T, rtol, xs) in (
-            (Float16, 5e-2, (0.3, 1)),
-            (Float32, 1e-3, (0.3, 4, 100)),
-            (Float64, 1e-9, (0.3, 4, 100)),
-        ), x in T.(xs)
-        test_frule(NaNMath.sqrt, x ⊢ one(x); fdm, rtol)
-        test_rrule(NaNMath.sqrt, x; fdm, rtol)
+    # ChainRulesTestUtils finite-differences within `max_range * |tangent|` of the input, with
+    # `max_range = 1e-2` and `Float64` tangents drawn from `-9:0.01:9`. Inputs ≥ 0.1 therefore keep
+    # the stencil above 0, where `NaNMath.sqrt` returns `NaN`, for any draw of the tangent.
+    @testset "sqrt($(repr(x)))" for x in (0.1, 0.3, 4.0, 100.0)
+        test_frule(NaNMath.sqrt, x)
+        test_rrule(NaNMath.sqrt, x)
     end
 
-    for T in (Float16, Float32, Float64)
-        @test isnan(rrule(NaNMath.sqrt, T(-1))[2](one(T))[2])
-        @test rrule(NaNMath.sqrt, zero(T))[2](one(T)) === (NoTangent(), T(Inf))
+    # Closer to 0 the tangent is scaled to `x`, to keep the stencil above 0. Only the `frule` can
+    # be tested this way: `test_rrule` differences each input on its own and ignores the tangents.
+    # The tangents of `NaNMath.sqrt` are then tiny, so the default `atol = 1e-9` would accept anything.
+    @testset "sqrt($(repr(x)))" for x in (1e-3, 1e-30, 1e-300)
+        test_frule(NaNMath.sqrt, x ⊢ x / 10; atol=0)
+    end
+
+    # Finite differencing is too inaccurate in lower precision, and ChainRulesTestUtils draws their
+    # tangents from an unbounded distribution, so the rules are compared with the `Float64` ones
+    @testset "sqrt($(repr(x)))" for T in (Float16, Float32), x in T.((0.1, 0.3, 4, 100))
+        y, ẏ = @inferred frule((NoTangent(), one(T)), NaNMath.sqrt, x)
+        _, ẏ64 = frule((NoTangent(), 1.0), NaNMath.sqrt, Float64(x))
+        @test y === NaNMath.sqrt(x)
+        @test ẏ isa T && ẏ ≈ T(ẏ64)
+
+        _y, pb = @inferred rrule(NaNMath.sqrt, x)
+        _, x̄ = @inferred pb(one(T))
+        _, x̄64 = rrule(NaNMath.sqrt, Float64(x))[2](1.0)
+        @test _y === y
+        @test x̄ isa T && x̄ ≈ T(x̄64)
+    end
+
+    # The derivative is `Inf` at `x = ±0` and `NaN` at `x < 0`, but zero (co)tangents stay zero
+    @testset "sqrt($(repr(x)))" for T in (Float16, Float32, Float64), x in (-one(T), -zero(T), zero(T))
+        y, ẏ = frule((NoTangent(), one(T)), NaNMath.sqrt, x)
+        _y, pb = rrule(NaNMath.sqrt, x)
+        _, x̄ = pb(one(T))
+        @test y === _y === NaNMath.sqrt(x)
+        @test ẏ isa T && x̄ isa T
+        if x < 0
+            @test isnan(ẏ) && isnan(x̄)
+        else
+            @test ẏ == x̄ == Inf
+        end
+
+        @test frule((NoTangent(), zero(T)), NaNMath.sqrt, x) === (y, zero(T))
+        @test frule((NoTangent(), ZeroTangent()), NaNMath.sqrt, x) === (y, ZeroTangent())
+        @test pb(zero(T)) === (NoTangent(), zero(T))
+        @test pb(ZeroTangent()) === (NoTangent(), ZeroTangent())
     end
 end
