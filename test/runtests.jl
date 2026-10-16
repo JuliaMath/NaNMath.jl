@@ -1,4 +1,7 @@
 using NaNMath
+using ChainRulesCore
+using ChainRulesTestUtils
+using FiniteDifferences: forward_fdm
 using Test
 
 @test isnan(NaNMath.log(-10))
@@ -244,5 +247,26 @@ end
         @test y isa T
         @test !isnan(y)
         @test y === acosh(T(2.1))
+    end
+end
+
+@testset "ChainRules" begin
+    # Forward differences never evaluate `NaNMath.sqrt` below `x` (in `test_frule` only for a
+    # positive tangent), so they can't step below 0, where `NaNMath.sqrt` returns NaN.
+    # Finite differencing in Float16 is erratic (errors of up to 20% for some inputs > 1),
+    # so Float16 is only tested at inputs where it is reliable.
+    fdm = forward_fdm(5, 1)
+    @testset "sqrt($(repr(x)))" for (T, rtol, xs) in (
+            (Float16, 5e-2, (0.3, 1)),
+            (Float32, 1e-3, (0.3, 4, 100)),
+            (Float64, 1e-9, (0.3, 4, 100)),
+        ), x in T.(xs)
+        test_frule(NaNMath.sqrt, x ⊢ one(x); fdm, rtol)
+        test_rrule(NaNMath.sqrt, x; fdm, rtol)
+    end
+
+    for T in (Float16, Float32, Float64)
+        @test isnan(rrule(NaNMath.sqrt, T(-1))[2](one(T))[2])
+        @test rrule(NaNMath.sqrt, zero(T))[2](one(T)) === (NoTangent(), T(Inf))
     end
 end
