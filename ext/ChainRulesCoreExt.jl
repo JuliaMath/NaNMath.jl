@@ -14,13 +14,13 @@ function _sqrt_tangent(Δ, Ω)
     return iszero(Δ) ? zero(∂) : ∂
 end
 
-function ChainRulesCore.frule((_, Δx), ::typeof(NaNMath.sqrt), x::IEEEFloat)
-    Ω = NaNMath.sqrt(x)
+function ChainRulesCore.frule((_, Δx), ::typeof(NaNMath._sqrt), x::IEEEFloat)
+    Ω = NaNMath._sqrt(x)
     return Ω, _sqrt_tangent(Δx, Ω)
 end
 
-function ChainRulesCore.rrule(::typeof(NaNMath.sqrt), x::IEEEFloat)
-    Ω = NaNMath.sqrt(x)
+function ChainRulesCore.rrule(::typeof(NaNMath._sqrt), x::IEEEFloat)
+    Ω = NaNMath._sqrt(x)
     sqrt_pullback(ΔΩ) = (NoTangent(), _sqrt_tangent(unthunk(ΔΩ), Ω))
     return Ω, sqrt_pullback
 end
