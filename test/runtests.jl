@@ -11,6 +11,9 @@ for T in (Float16, Float32, Float64, BigFloat)
 end
 @test isnan(NaNMath.pow(-1.5,2.3f0))
 @test isnan(NaNMath.pow(-1.5f0,2.3))
+# `float` rounds this exponent onto an integer-valued `Float64`, so the domain check has
+# to look at the original `y`.
+@test isnan(NaNMath.pow(-1.5, (2^60 + 1)//2))
 @test NaNMath.pow(-1.5f0,2) isa Float32
 @test NaNMath.pow(-1.5f0,2//1) isa Float32
 @test NaNMath.pow(-1.5f0,2.3f0) isa Float32
@@ -27,14 +30,18 @@ end
 @test isnan(NaNMath.sqrt(-5))
 @test NaNMath.sqrt(5) == Base.sqrt(5)
 @test isnan(NaNMath.sqrt(-3.2f0)) && NaNMath.sqrt(-3.2f0) isa Float32
-@test isnan(NaNMath.sqrt(-BigFloat(7.0))) && NaNMath.sqrt(-BigFloat(7.0)) isa BigFloat 
-@test isnan(NaNMath.sqrt(-7)) && NaNMath.sqrt(-7) isa Float64 
+@test isnan(NaNMath.sqrt(Float16(-3.2))) && NaNMath.sqrt(Float16(-3.2)) isa Float16
+@test NaNMath.sqrt(Float16(5)) === Base.sqrt(Float16(5))
+@test isnan(NaNMath.sqrt(-BigFloat(7.0))) && NaNMath.sqrt(-BigFloat(7.0)) isa BigFloat
+@test isnan(NaNMath.sqrt(-7)) && NaNMath.sqrt(-7) isa Float64
 @inferred NaNMath.sqrt(5)
 @inferred NaNMath.sqrt(5.0)
 @inferred NaNMath.sqrt(5.0f0)
+@inferred NaNMath.sqrt(Float16(5))
 @inferred NaNMath.sqrt(-5)
 @inferred NaNMath.sqrt(-5.0)
 @inferred NaNMath.sqrt(-5.0f0)
+@inferred NaNMath.sqrt(Float16(-5))
 @test NaNMath.sum([1., 2., NaN]) == 3.0
 @test NaNMath.sum([1. 2.; NaN 1.]) == 4.0
 @test isnan(NaNMath.sum([NaN, NaN]))
@@ -298,4 +305,92 @@ end
         @test pb(zero(T)) === (NoTangent(), zero(T))
         @test pb(ZeroTangent()) === (NoTangent(), ZeroTangent())
     end
+end
+
+@testset "BigFloat (#95)" begin
+    # Run at two non-default precisions: neither a Float64 detour (53 bits) nor a
+    # hard-coded precision can satisfy both.
+    @testset "precision = $p" for p in (64, 1024)
+        setprecision(BigFloat, p) do
+            # NOTE: `big"0.5"` is parsed at macro-expansion time at the *default*
+            # precision and ignores `setprecision`, so build the inputs here instead.
+            half, two = BigFloat("0.5"), BigFloat("2.0")
+
+            # In-domain: correctly rounded at the active precision, matching Base exactly.
+            for (f, g, x) in ((NaNMath.sin, sin, half), (NaNMath.cos, cos, half),
+                              (NaNMath.tan, tan, half), (NaNMath.asin, asin, half),
+                              (NaNMath.acos, acos, half), (NaNMath.atanh, atanh, half),
+                              (NaNMath.log1p, log1p, half), (NaNMath.acosh, acosh, two),
+                              (NaNMath.log, log, two), (NaNMath.log2, log2, two),
+                              (NaNMath.log10, log10, two), (NaNMath.sqrt, sqrt, two))
+                y = @inferred(f(x))
+                @test y isa BigFloat
+                @test precision(y) == p
+                @test y == g(x)
+            end
+
+            # Out-of-domain: NaN rather than a DomainError, at the active precision.
+            for (f, x) in ((NaNMath.sin, BigFloat(Inf)), (NaNMath.cos, BigFloat(Inf)),
+                           (NaNMath.tan, BigFloat(Inf)), (NaNMath.asin, two),
+                           (NaNMath.acos, two), (NaNMath.acosh, half),
+                           (NaNMath.atanh, two), (NaNMath.log, -two),
+                           (NaNMath.log2, -two), (NaNMath.log10, -two),
+                           (NaNMath.log1p, -two), (NaNMath.sqrt, -two))
+                y = @inferred(f(x))
+                @test y isa BigFloat
+                @test isnan(y)
+                @test precision(y) == p
+            end
+        end
+    end
+
+    # The result takes the global precision at call time, not the argument's, as in Base.
+    x = BigFloat("0.5"; precision = 64)
+    setprecision(BigFloat, 256) do
+        @test precision(NaNMath.sin(x)) == 256
+        @test NaNMath.sin(x) == sin(x)
+    end
+
+    # `lgamma` has no `Base` counterpart, so it still hits the `::Real` guard.
+    @test_throws MethodError NaNMath.lgamma(BigFloat("2.0"))
+end
+
+# A `Real` that is not an `AbstractFloat` and that `float` leaves unchanged, e.g.
+# `ForwardDiff.Dual`. `convert`, `oftype` and `one` fall back to the `Number` methods.
+struct FloatFixedPoint <: Real
+    x::Float64
+end
+Base.float(y::FloatFixedPoint) = y
+Base.promote_rule(::Type{FloatFixedPoint}, ::Type{<:Real}) = FloatFixedPoint
+Base.:<(a::FloatFixedPoint, b::FloatFixedPoint) = a.x < b.x
+Base.abs(y::FloatFixedPoint) = FloatFixedPoint(abs(y.x))
+Base.isfinite(y::FloatFixedPoint) = isfinite(y.x)
+for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
+          :log1p, :sqrt)
+    @eval Base.$f(y::FloatFixedPoint) = FloatFixedPoint((Base.$f)(y.x))
+end
+
+@testset "`Real` fixed points of `float`" begin
+    # Previously a `MethodError`, and a `StackOverflowError` for `sqrt`.
+    for (f, g, x) in ((NaNMath.sin, sin, 0.5), (NaNMath.cos, cos, 0.5),
+                      (NaNMath.tan, tan, 0.5), (NaNMath.asin, asin, 0.5),
+                      (NaNMath.acos, acos, 0.5), (NaNMath.atanh, atanh, 0.5),
+                      (NaNMath.log1p, log1p, 0.5), (NaNMath.acosh, acosh, 2.0),
+                      (NaNMath.log, log, 2.0), (NaNMath.log2, log2, 2.0),
+                      (NaNMath.log10, log10, 2.0), (NaNMath.sqrt, sqrt, 2.0))
+        y = @inferred(f(FloatFixedPoint(x)))
+        @test y isa FloatFixedPoint
+        @test y.x === g(x)
+    end
+
+    for (f, x) in ((NaNMath.sin, Inf), (NaNMath.cos, Inf), (NaNMath.tan, Inf),
+                   (NaNMath.asin, 2.0), (NaNMath.acos, 2.0), (NaNMath.acosh, 0.5),
+                   (NaNMath.atanh, 2.0), (NaNMath.log, -2.0), (NaNMath.log2, -2.0),
+                   (NaNMath.log10, -2.0), (NaNMath.log1p, -2.0), (NaNMath.sqrt, -2.0))
+        y = @inferred(f(FloatFixedPoint(x)))
+        @test y isa FloatFixedPoint
+        @test isnan(y.x)
+    end
+
+    @test_throws MethodError NaNMath.lgamma(FloatFixedPoint(2.0))
 end

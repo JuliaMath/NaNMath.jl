@@ -3,70 +3,73 @@ module NaNMath
 using OpenLibm_jll
 const libm = OpenLibm_jll.libopenlibm
 
+# Non-`Real` arguments are forwarded to `Base` unchanged: the domain checks below need a
+# total order, which `Real` guarantees but `Number` does not.
 for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh,
-          :log, :log2, :log10, :log1p, :lgamma)
-    @eval begin
-        function ($f)(x::Real)
-            xf = float(x)
-            x === xf && throw(MethodError($f, (x,)))
-            ($f)(xf)
-        end
-        $(f !== :lgamma ? :(($f)(x) = (Base.$f)(x)) : :())
-    end
+          :log, :log2, :log10, :log1p, :sqrt)
+    @eval ($f)(x) = (Base.$f)(x)
+end
+
+# `lgamma` has no counterpart in `Base`. The guard breaks the recursion for types for which
+# `float` is the identity, e.g. `BigFloat`.
+function lgamma(x::Real)
+    xf = float(x)
+    xf isa typeof(x) && throw(MethodError(lgamma, (x,)))
+    lgamma(xf)
 end
 
 Base.@assume_effects :total lgamma(x::Float64) = ccall(("lgamma",libm), Float64, (Float64,), x)
 Base.@assume_effects :total lgamma(x::Float32) = ccall(("lgammaf",libm), Float32, (Float32,), x)
 
+# The converted argument is passed to `Base` directly instead of re-dispatched, so that the
+# domain checks also cover `Real` types that `float` leaves unchanged. Only arguments inside
+# the domain reach `Base`.
 for f in (:sin, :cos, :tan)
-    @eval begin
-        function ($f)(x::T) where T<:Union{Float16, Float32, Float64}
-            isinf(x) ? T(NaN) : (Base.$f)(x)
-        end
+    @eval function ($f)(x::Real)
+        xf = float(x)
+        isfinite(xf) ? (Base.$f)(xf) : oftype(xf, NaN)
     end
 end
 
 for f in (:asin, :acos, :atanh)
-    @eval begin
-        function ($f)(x::T) where T<:Union{Float16, Float32, Float64}
-            abs(x) > T(1) ? T(NaN) : (Base.$f)(x)
-        end
+    @eval function ($f)(x::Real)
+        xf = float(x)
+        abs(xf) <= 1 ? (Base.$f)(xf) : oftype(xf, NaN)
     end
 end
-function acosh(x::T) where T<:Union{Float16, Float32, Float64}
-    x < T(1) ? T(NaN) : Base.acosh(x)
+
+function acosh(x::Real)
+    xf = float(x)
+    xf >= 1 ? Base.acosh(xf) : oftype(xf, NaN)
 end
 
 for f in (:log, :log2, :log10)
-    @eval begin
-        function ($f)(x::T) where T<:Union{Float16, Float32, Float64}
-            x < 0 ? T(NaN) : (Base.$f)(x)
-        end
+    @eval function ($f)(x::Real)
+        xf = float(x)
+        xf >= 0 ? (Base.$f)(xf) : oftype(xf, NaN)
     end
 end
 
-function log1p(x::T) where T<:Union{Float16, Float32, Float64}
-    x < T(-1) ? T(NaN) : Base.log1p(x)
-end
-
-for f in (:sqrt,)
-    @eval ($f)(x) = (Base.$f)(x)
+function log1p(x::Real)
+    xf = float(x)
+    xf >= -1 ? Base.log1p(xf) : oftype(xf, NaN)
 end
 
 for f in (:max, :min)
     @eval ($f)(x, y) = (Base.$f)(x, y)
 end
 
-sqrt(x::T) where {T<:Union{Float16, Float32, Float64}} = x < T(0) ? T(NaN) : Base.Intrinsics.sqrt_llvm(x)
-sqrt(x::T) where {T<:AbstractFloat} = x < T(0) ? T(NaN) : Base.sqrt(x)
-sqrt(x::Real) = sqrt(float(x))
+# `_sqrt` expects an already converted argument, so `float` is applied exactly once.
+sqrt(x::Real) = _sqrt(float(x))
+_sqrt(x::T) where {T<:Union{Float16, Float32, Float64}} = x >= T(0) ? Base.Intrinsics.sqrt_llvm(x) : T(NaN)
+_sqrt(x::Real) = x >= 0 ? Base.sqrt(x) : oftype(x, NaN)
 
 # Don't override built-in ^ operator
 # We `promote` first before converting to floating pointing numbers to ensure that
 # e.g. `pow(::Float32, ::Int)` ends up calling `pow(::Float32, ::Float32)`
 function pow(x::Real, y::Real)
     fx, fy = map(float, promote(x, y))
-    return fx < 0 && !isinteger(fy) ? oftype(fx, NaN) : fx^fy
+    return fx >= 0 || isinteger(y) ? fx^fy : oftype(fx, NaN)
 end
 pow(x::Number, y::Integer) = x^y # safe fallback
 pow(x::Real, y::Integer) = x^y # safe fallback
