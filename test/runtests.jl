@@ -1,4 +1,6 @@
 using NaNMath
+using ChainRulesCore
+using ChainRulesTestUtils
 using Test
 
 @test isnan(NaNMath.log(-10))
@@ -251,6 +253,57 @@ end
         @test y isa T
         @test !isnan(y)
         @test y === acosh(T(2.1))
+    end
+end
+
+@testset "ChainRules" begin
+    # ChainRulesTestUtils finite-differences within `max_range * |tangent|` of the input, with
+    # `max_range = 1e-2` and `Float64` tangents drawn from `-9:0.01:9`. Inputs ≥ 0.1 therefore keep
+    # the stencil above 0, where `NaNMath._sqrt` returns `NaN`, for any draw of the tangent.
+    @testset "sqrt($(repr(x)))" for x in (0.1, 0.3, 4.0, 100.0)
+        test_frule(NaNMath._sqrt, x)
+        test_rrule(NaNMath._sqrt, x)
+    end
+
+    # Closer to 0 the tangent is scaled to `x`, to keep the stencil above 0. Only the `frule` can
+    # be tested this way: `test_rrule` differences each input on its own and ignores the tangents.
+    # The tangents of `NaNMath._sqrt` are then tiny, so the default `atol = 1e-9` would accept anything.
+    @testset "sqrt($(repr(x)))" for x in (1e-3, 1e-30, 1e-300)
+        test_frule(NaNMath._sqrt, x ⊢ x / 10; atol=0)
+    end
+
+    # Finite differencing is too inaccurate in lower precision, and ChainRulesTestUtils draws their
+    # tangents from an unbounded distribution, so the rules are compared with the `Float64` ones
+    @testset "sqrt($(repr(x)))" for T in (Float16, Float32), x in T.((0.1, 0.3, 4, 100))
+        y, ẏ = @inferred frule((NoTangent(), one(T)), NaNMath._sqrt, x)
+        _, ẏ64 = frule((NoTangent(), 1.0), NaNMath._sqrt, Float64(x))
+        @test y === NaNMath.sqrt(x)
+        @test ẏ isa T && ẏ ≈ T(ẏ64)
+
+        _y, pb = @inferred rrule(NaNMath._sqrt, x)
+        _, x̄ = @inferred pb(one(T))
+        _, x̄64 = rrule(NaNMath._sqrt, Float64(x))[2](1.0)
+        @test _y === y
+        @test x̄ isa T && x̄ ≈ T(x̄64)
+    end
+
+    # The derivative is `Inf` at `x = ±0` and `NaN` at `x < 0`, but zero (co)tangents stay zero
+    @testset "sqrt($(repr(x)))" for T in (Float16, Float32, Float64), x in (-one(T), -zero(T), zero(T))
+        y, ẏ = frule((NoTangent(), one(T)), NaNMath._sqrt, x)
+        _y, pb = rrule(NaNMath._sqrt, x)
+        _, x̄ = pb(one(T))
+        @test y === _y === NaNMath.sqrt(x)
+        @test ẏ isa T && x̄ isa T
+        if x < 0
+            @test isnan(ẏ) && isnan(x̄)
+        else
+            @test ẏ == x̄ == Inf
+        end
+
+        @test frule((NoTangent(), zero(T)), NaNMath._sqrt, x) === (y, zero(T))
+        @test frule((NoTangent(), ZeroTangent()), NaNMath._sqrt, x) === (y, ZeroTangent())
+        @test pb(zero(T)) === (NoTangent(), zero(T))
+        @test pb(ZeroTangent()) === (NoTangent(), ZeroTangent())
     end
 end
 
