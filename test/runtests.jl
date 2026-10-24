@@ -276,7 +276,7 @@ end
     # tangents from an unbounded distribution, so the rules are compared with the `Float64` ones
     @testset "sqrt($(repr(x)))" for T in (Float16, Float32), x in T.((0.1, 0.3, 4, 100))
         y, ẏ = @inferred frule((NoTangent(), one(T)), NaNMath._sqrt, x)
-        _, ẏ64 = frule((NoTangent(), 1.0), NaNMath.sqrt, Float64(x))
+        _, ẏ64 = frule((NoTangent(), 1.0), NaNMath._sqrt, Float64(x))
         @test y === NaNMath.sqrt(x)
         @test ẏ isa T && ẏ ≈ T(ẏ64)
 
