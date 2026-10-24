@@ -292,7 +292,8 @@ end
         y, ẏ = frule((NoTangent(), one(T)), NaNMath._sqrt, x)
         _y, pb = rrule(NaNMath._sqrt, x)
         _, x̄ = pb(one(T))
-        @test y === _y === NaNMath.sqrt(x)
+        # `isequal` instead of `===`: the sign of the returned `NaN` depends on compilation (e.g. x86 `sqrtsd`)
+        @test y isa T && isequal(_y, y) && isequal(NaNMath.sqrt(x), y)
         @test ẏ isa T && x̄ isa T
         if x < 0
             @test isnan(ẏ) && isnan(x̄)
@@ -300,8 +301,10 @@ end
             @test ẏ == x̄ == Inf
         end
 
-        @test frule((NoTangent(), zero(T)), NaNMath._sqrt, x) === (y, zero(T))
-        @test frule((NoTangent(), ZeroTangent()), NaNMath._sqrt, x) === (y, ZeroTangent())
+        Ω, Δ = frule((NoTangent(), zero(T)), NaNMath._sqrt, x)
+        @test isequal(Ω, y) && Δ === zero(T)
+        Ω, Δ = frule((NoTangent(), ZeroTangent()), NaNMath._sqrt, x)
+        @test isequal(Ω, y) && Δ === ZeroTangent()
         @test pb(zero(T)) === (NoTangent(), zero(T))
         @test pb(ZeroTangent()) === (NoTangent(), ZeroTangent())
     end
